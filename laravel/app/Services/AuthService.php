@@ -61,6 +61,11 @@ class AuthService extends BaseService
      */
     public function checkCaptcha(string $mobile, string $code)
     {
+        // 非生产环境不做校验
+        if (!app()->environment('production')) {
+            return true;
+        }
+
         $key = "register_captcha_${mobile}";
         $isPass = $code === Cache::get($key);
         // 验证通过删除缓存
