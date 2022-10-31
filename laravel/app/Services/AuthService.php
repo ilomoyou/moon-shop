@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Notification;
 use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
 use Overtrue\EasySms\PhoneNumber;
 
-class AuthService
+class AuthService extends BaseService
 {
     /**
      * 验证手机号发送验证码是否达到限制条数

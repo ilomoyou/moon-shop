@@ -4,7 +4,6 @@
 namespace App\Http\Controllers\Wx;
 
 
-use App\Exceptions\BusinessException;
 use App\Models\User;
 use App\Rules\MobilePhone;
 use App\Services\AuthService;
@@ -22,7 +21,6 @@ class AuthController extends BaseController
      * 用户注册
      * @param  Request  $request
      * @return JsonResponse
-     * @throws BusinessException
      */
     public function register(Request $request)
     {
@@ -52,7 +50,7 @@ class AuthController extends BaseController
         }
 
         // 校验验证码是否正确
-        (new AuthService())->checkCaptcha($mobile, $code);
+        AuthService::getInstance()->checkCaptcha($mobile, $code);
 
         // 写入用户表
         $user = new User();
@@ -107,15 +105,15 @@ class AuthController extends BaseController
         if (!$lock) {
             return $this->fail(ResponseCode::AUTH_CAPTCHA_FREQUENCY);
         }
-        $isPass = (new AuthService())->checkMobileSendCaptchaCount($mobile);
+        $isPass = AuthService::getInstance()->checkMobileSendCaptchaCount($mobile);
         if (!$isPass) {
             return $this->fail(ResponseCode::AUTH_CAPTCHA_FREQUENCY, '验证码发送频次超过当天限制');
         }
 
         // 设置验证码
-        $code = (new AuthService())->setCaptcha($mobile);
+        $code = AuthService::getInstance()->setCaptcha($mobile);
         // 发送短信
-        (new AuthService())->sendCaptchaMsg($mobile, $code);
+        AuthService::getInstance()->sendCaptchaMsg($mobile, $code);
 
         return $this->success();
     }

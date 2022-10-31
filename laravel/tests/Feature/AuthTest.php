@@ -26,7 +26,7 @@ class AuthTest extends TestCase
 
     public function testRegister()
     {
-        $code = (new AuthService())->setCaptcha('18111111111');
+        $code = AuthService::getInstance()->setCaptcha('18111111111');
         $data = [
             'username' => '隔壁老王',
             'password' => '123456',
