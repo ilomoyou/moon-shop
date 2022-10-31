@@ -63,6 +63,7 @@ export function authRegister(data) {
   return request({
     url: AuthRegister,
     method: 'post',
+    version: 'v1',
     data
   });
 }
@@ -74,11 +75,12 @@ export function authReset(data) {
     data
   })
 }
-const AuthRegisterCaptcha='/auth/regCaptcha'; //注册验证码
+const AuthRegisterCaptcha='/auth/reg-captcha'; //注册验证码
 export function authRegisterCaptcha(data) {
   return request({
     url: AuthRegisterCaptcha,
     method: 'post',
+    version: 'v1',
     data
   })
 }

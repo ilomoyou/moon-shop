@@ -15,6 +15,10 @@ service.interceptors.request.use(
         'Authorization'
       ) || ''}`;
     }
+    // 重构版本路由切换
+    if (config.version === 'v1') {
+      config.baseURL = process.env.VUE_APP_BASE_API_V1
+    }
     return config;
   },
   err => Promise.reject(err)
