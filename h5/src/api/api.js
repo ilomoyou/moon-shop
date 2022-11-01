@@ -33,6 +33,7 @@ export function authLoginByAccount(data) {
   return request({
     url: AuthLoginByAccount,
     method: 'post',
+    version: 'v1',
     data
   })
 }
