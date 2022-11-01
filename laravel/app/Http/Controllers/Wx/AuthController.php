@@ -11,12 +11,57 @@ use App\util\ResponseCode;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends BaseController
 {
+    protected $only = ['user'];
+
+    public function user()
+    {
+        $user = Auth::guard('wx')->user();
+        return $this->success($user);
+    }
+
+    public function login(Request $request)
+    {
+        $username = $request->input('username');
+        $password = $request->input('password');
+        if (empty($username) || empty($password)) {
+            return $this->fail(ResponseCode::PARAM_ILLEGAL);
+        }
+
+        // 账号密码校验
+        $user = User::getByUsername($username);
+        if (is_null($user)) {
+            return $this->fail(ResponseCode::AUTH_INVALID_ACCOUNT);
+        }
+        $isPass = Hash::check($password, $user->getAuthPassword());
+        if (!$isPass) {
+            return $this->fail(ResponseCode::AUTH_INVALID_ACCOUNT, '账号密码错误');
+        }
+
+        // 更新登录信息
+        $user->last_login_time = now()->toDateTimeString();
+        $user->last_login_ip = $request->getClientIp();
+        if (!$user->save()) {
+            return $this->fail(ResponseCode::UPDATED_FAIL);
+        }
+
+        // 生成token
+        $token = Auth::guard('wx')->login($user);
+        return $this->success([
+            'token' => $token,
+            'userInfo' => [
+                'nickName' => $username,
+                'avatarUrl' => $user->avatar
+            ]
+        ]);
+    }
+
     /**
      * 用户注册
      * @param  Request  $request

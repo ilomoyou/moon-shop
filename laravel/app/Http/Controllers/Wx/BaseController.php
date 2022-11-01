@@ -9,6 +9,22 @@ use App\util\ResponseCode;
 
 class BaseController extends Controller
 {
+    protected $only;
+    protected $except;
+
+    public function __construct()
+    {
+        // 统一鉴权认证
+        $option = [];
+        if (!is_null($this->only)) {
+            $option['only'] = $this->only;
+        }
+        if (!is_null($this->except)) {
+            $option['except'] = $this->except;
+        }
+        $this->middleware('auth:wx', $option);
+    }
+
     protected function codeReturn(array $responseCode, $data = null, $info = '')
     {
         list($errno, $errmsg) = $responseCode;

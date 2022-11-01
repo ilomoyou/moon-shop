@@ -62,4 +62,35 @@ class AuthTest extends TestCase
         $response = $this->post('wx/auth/reg-captcha', ['mobile' => '18897729025']);
         $response->assertJson(['errno' => 702, 'errmsg' => '验证码发送频繁，请稍后再试!']);
     }
+
+    public function testLogin()
+    {
+        $response = $this->post('wx/auth/login', [
+            'username' => 'test',
+            'password' => '123456',
+        ]);
+        $response->assertJson([
+            "errno" => 0,
+            "errmsg" => "请求成功!",
+            "data" => [
+                "userInfo" => [
+                    "nickname" => "test",
+                    "avatar" => "https://yanxuan.nosdn.127.net/80841d741d7fa3073e0ae27bf487339f.jpg?imageView&quality=90&thumbnail=64x64"
+                ]
+            ]
+        ]);
+        echo $response->getOriginalContent()['data']['token'] ?? '';
+        $this->assertNotEmpty($response->getOriginalContent()['data']['token'] ?? '');
+    }
+
+    public function testUser()
+    {
+        $response = $this->post('wx/auth/login', [
+            'username' => 'user123',
+            'password' => 'user123',
+        ]);
+        $token = $response->getOriginalContent()['data']['token'] ?? '';
+        $response2 = $this->get('wx/auth/user', ['Authorization' => "Bearer ${token}"]);
+        $response2->assertJson(['data' => ['username' => 'user123']]);
+    }
 }
