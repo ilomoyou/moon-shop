@@ -14,8 +14,7 @@ class BaseService
         if (static::$instance instanceof static) {
             return static::$instance;
         }
-        static::$instance = new static();
-        return static::$instance;
+        return static::$instance = new static();
     }
 
     // 私有化 __construct 和 __clone 方法 禁止外部实例化实现单例
