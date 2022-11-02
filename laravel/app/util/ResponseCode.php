@@ -19,5 +19,6 @@ class ResponseCode
     const AUTH_CAPTCHA_UN_MATCH = [703, '验证码错误'];
     const AUTH_NAME_REGISTERED = [704, '用户已注册'];
     const AUTH_MOBILE_REGISTERED = [705, '手机号已注册'];
+    const AUTH_MOBILE_UNREGISTERED = [706, '手机号未注册'];
     const AUTH_INVALID_MOBILE = [707, '手机号格式不正确'];
 }

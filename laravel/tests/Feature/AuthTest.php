@@ -1,8 +1,10 @@
 <?php
 
 
+use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -83,14 +85,78 @@ class AuthTest extends TestCase
         $this->assertNotEmpty($response->getOriginalContent()['data']['token'] ?? '');
     }
 
-    public function testUser()
+    public function testInfo()
     {
         $response = $this->post('wx/auth/login', [
             'username' => 'user123',
             'password' => 'user123',
         ]);
         $token = $response->getOriginalContent()['data']['token'] ?? '';
-        $response2 = $this->get('wx/auth/user', ['Authorization' => "Bearer ${token}"]);
-        $response2->assertJson(['data' => ['username' => 'user123']]);
+        $response2 = $this->get('wx/auth/info', ['Authorization' => "Bearer ${token}"]);
+        $user = User::getByUsername('user123');
+        $response2->assertJson([
+            'data' => [
+                'nickName' => $user->nickname,
+                'avatar' => $user->avatar,
+                'gender' => $user->gender,
+                'mobile' => $user->mobile
+            ]
+        ]);
+    }
+
+    public function testLogout()
+    {
+        $response = $this->post('wx/auth/login', [
+            'username' => 'user123',
+            'password' => 'user123',
+        ]);
+        $token = $response->getOriginalContent()['data']['token'] ?? '';
+        $response2 = $this->get('wx/auth/info', ['Authorization' => "Bearer ${token}"]);
+        $user = User::getByUsername('user123');
+        $response2->assertJson([
+            'data' => [
+                'nickName' => $user->nickname,
+                'avatar' => $user->avatar,
+                'gender' => $user->gender,
+                'mobile' => $user->mobile
+            ]
+        ]);
+        $response3 = $this->post('wx/auth/logout', ['Authorization' => "Bearer ${token}"]);
+        $response3->assertJson(['errno' => 0]);
+        $response4 = $this->get('wx/auth/info', ['Authorization' => "Bearer ${token}"]);
+        $response4->assertJson(['errno' => 501]);
+    }
+
+    public function testRest()
+    {
+        $mobile = '18897729026';
+        $password = '123';
+        $code = AuthService::getInstance()->setCaptcha($mobile);
+        $response = $this->post('wx/auth/reset', [
+            'mobile' => $mobile,
+            'password' => $password,
+            'code' => $code
+        ]);
+        $response->assertJson(['errno' => 0]);
+        $user = User::getByMobile($mobile);
+        $isPass = Hash::check($password, $user->password);
+        $this->assertTrue($isPass);
+    }
+
+    public function testProfile()
+    {
+        $response = $this->post('wx/auth/login', [
+            'username' => 'user123',
+            'password' => 'user123',
+        ]);
+        $token = $response->getOriginalContent()['data']['token'] ?? '';
+        $response2 = $this->post('wx/auth/profile', [
+            'avatar' => '',
+            'gender' => 1,
+            'nickname' => 'user1234'
+        ], ['Authorization' => "Bearer ${token}"]);
+        $user = User::getByUsername('user123');
+        $this->assertEquals('user1234', $user->nickname);
+        $this->assertEquals('1', $user->gender);
     }
 }

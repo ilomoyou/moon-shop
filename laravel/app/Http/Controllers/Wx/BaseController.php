@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Wx;
 
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\util\ResponseCode;
+use Illuminate\Support\Facades\Auth;
 
 class BaseController extends Controller
 {
@@ -43,5 +45,21 @@ class BaseController extends Controller
     protected function fail(array $responseCode = ResponseCode::FAIL, $info = '')
     {
         return $this->codeReturn($responseCode, null, $info);
+    }
+
+    protected function failOrSuccess($isSuccess, array $responseCode = ResponseCode::FAIL, $data = null, $info = '')
+    {
+        if ($isSuccess) {
+            return $this->success($data);
+        }
+        return $this->fail($responseCode, $info);
+    }
+
+    /**
+     * @return User|null
+     */
+    protected function user()
+    {
+        return Auth::guard('wx')->user();
     }
 }

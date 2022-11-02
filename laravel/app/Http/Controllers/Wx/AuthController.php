@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\Wx;
 
 
+use App\Exceptions\BusinessException;
 use App\Models\User;
 use App\Rules\MobilePhone;
 use App\Services\AuthService;
@@ -18,14 +19,94 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends BaseController
 {
-    protected $only = ['user'];
+    protected $only = ['info', 'profile'];
 
-    public function user()
+    /**
+     * 获取用户信息
+     * @return JsonResponse
+     */
+    public function info()
     {
-        $user = Auth::guard('wx')->user();
-        return $this->success($user);
+        $user = $this->user();
+        return $this->success([
+            'nickName' => $user->nickname,
+            'avatar' => $user->avatar,
+            'gender' => $user->gender,
+            'mobile' => $user->mobile
+        ]);
     }
 
+    /**
+     * 用户信息修改
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function profile(Request $request)
+    {
+        $user = $this->user();
+        $avatar = $request->input('avatar');
+        $gender = $request->input('gender');
+        $nickname = $request->input('nickname');
+
+        if (!empty($avatar)) {
+            $user->avatar = $avatar;
+        }
+        if (!empty($gender)) {
+            $user->gender = $gender;
+        }
+        if (!empty($nickname)) {
+            $user->nickname = $nickname;
+        }
+        $ret = $user->save();
+        return $this->failOrSuccess($ret, ResponseCode::UPDATED_FAIL);
+    }
+
+    /**
+     * 账号退出
+     * @return JsonResponse
+     */
+    public function logout()
+    {
+        Auth::guard('wx')->logout();
+        return $this->success();
+    }
+
+    /**
+     * 密码重置
+     * @param  Request  $request
+     * @return JsonResponse
+     * @throws BusinessException
+     */
+    public function reset(Request $request)
+    {
+        $password = $request->input('password');
+        $mobile = $request->input('mobile');
+        $code = $request->input('code');
+
+        if (empty($password) || empty($mobile) || empty($code)) {
+            return $this->fail(ResponseCode::PARAM_ILLEGAL);
+        }
+
+        $isPass = AuthService::getInstance()->checkCaptcha($mobile, $code);
+        if (!$isPass) {
+            return $this->fail(ResponseCode::AUTH_CAPTCHA_UN_MATCH);
+        }
+
+        $user = User::getByMobile($mobile);
+        if (is_null($user)) {
+            return $this->fail(ResponseCode::AUTH_MOBILE_UNREGISTERED);
+        }
+
+        $user->password = Hash::make($password);
+        $ret = $user->save();
+        return $this->failOrSuccess($ret, ResponseCode::UPDATED_FAIL);
+    }
+
+    /**
+     * 账号登录
+     * @param  Request  $request
+     * @return JsonResponse
+     */
     public function login(Request $request)
     {
         $username = $request->input('username');
@@ -66,6 +147,7 @@ class AuthController extends BaseController
      * 用户注册
      * @param  Request  $request
      * @return JsonResponse
+     * @throws BusinessException
      */
     public function register(Request $request)
     {
