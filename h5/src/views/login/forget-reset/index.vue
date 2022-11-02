@@ -23,18 +23,45 @@
 <script>
 import field from '@/components/field/';
 import fieldGroup from '@/components/field-group/';
+import { authReset } from '@/api/api';
 
 export default {
   data() {
     return {
-      isErrow: true,
+      isErrow: false,
       password: '',
       passwordRepeat: ''
     };
   },
 
   methods: {
-    submitCode() {}
+    submitCode() {
+		this.isErrow = false;
+		let mobile = this.$route.params.mobile;
+		let code = this.$route.params.code;
+		if(mobile === '' || code === ''){
+			return
+		}
+		if (this.password !== this.passwordRepeat){
+			this.isErrow = true;
+			return
+		}
+		let data = {
+			mobile: mobile,
+			code: code,
+			password: this.password,
+			passwordRepeat: this.passwordRepeat
+		};
+
+		authReset(data).then(res => {
+			this.$router.push({
+				name: 'forgetStatus',
+				params: { status: 'success' }
+			});
+		}).catch(error => {
+			alert(error.data.errmsg);
+		});
+	}
   },
 
   components: {

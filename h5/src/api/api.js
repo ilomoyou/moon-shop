@@ -41,6 +41,7 @@ const AuthLogout='/auth/logout'; //账号登出
 export function authLogout() {
   return request({
     url: AuthLogout,
+    version: 'v1',
     method: 'post'
   })
 }
@@ -48,6 +49,7 @@ const AuthInfo='/auth/info'; //用户信息
 export function authInfo() {
   return request({
     url: AuthInfo,
+    version: 'v1',
     method: 'get'
   })
 }
@@ -56,6 +58,7 @@ export function authProfile(data) {
   return request({
     url: AuthProfile,
     method: 'post',
+    version: 'v1',
     data
   })
 }
@@ -73,6 +76,7 @@ export function authReset(data) {
   return request({
     url: AuthReset,
     method: 'post',
+    version: 'v1',
     data
   })
 }
@@ -85,11 +89,12 @@ export function authRegisterCaptcha(data) {
     data
   })
 }
-const AuthCaptcha='/auth/captcha'; //验证码
+const AuthCaptcha='/auth/reg-captcha'; //验证码
 export function authCaptcha(data) {
   return request({
     url: AuthCaptcha,
     method: 'post',
+    version: 'v1',
     data
   })
 }

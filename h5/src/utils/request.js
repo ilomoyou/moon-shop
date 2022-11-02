@@ -18,6 +18,12 @@ service.interceptors.request.use(
     // 重构版本路由切换
     if (config.version === 'v1') {
       config.baseURL = process.env.VUE_APP_BASE_API_V1
+      if (!config.headers['Authorization']) {
+        config.headers['Authorization'] = `Bearer ${window.localStorage.getItem(
+          'Authorization'
+        ) || ''}`;
+      }
+      delete config.headers['X-Litemall-Token']
     }
     return config;
   },
