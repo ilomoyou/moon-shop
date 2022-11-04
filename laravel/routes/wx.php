@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Wx\AddressController;
 use App\Http\Controllers\Wx\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,3 +11,9 @@ Route::get('auth/info', [AuthController::class, 'info']); // 用户信息
 Route::post('auth/logout', [AuthController::class, 'logout']); // 账号退出
 Route::post('auth/reset', [AuthController::class, 'reset']); // 密码重置
 Route::post('auth/profile', [AuthController::class, 'profile']); // 账号信息修改
+
+# 用户模块-地址
+Route::get('address/list', [AddressController::class, 'list']); // 收货地址列表
+Route::get('address/detail', [AddressController::class, 'detail']); // 收货地址详情
+Route::post('address/save', [AddressController::class, 'save']); // 保存收货地址
+Route::post('address/delete', [AddressController::class, 'delete']); // 删除收货地址

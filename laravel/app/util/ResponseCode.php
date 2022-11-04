@@ -9,6 +9,7 @@ class ResponseCode
     // 通用返回码
     const SUCCESS = [0, '请求成功!'];
     const FAIL = [-1, '请求错误!'];
+    const PARAM_ERROR = [400, '参数错误'];
     const PARAM_ILLEGAL = [401, '参数不合法'];
     const UN_AUTHORIZATION = [501, '未授权!'];
     const UPDATED_FAIL = [505, '更新数据失败'];

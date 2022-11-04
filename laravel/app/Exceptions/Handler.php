@@ -55,6 +55,13 @@ class Handler extends ExceptionHandler
             ]);
         }
 
+        if ($e instanceof ParametersException) {
+            return response()->json([
+                'errno' => $e->getCode(),
+                'errmsg' => $e->getMessage()
+            ], 400);
+        }
+
         return parent::render($request, $e);
     }
 }
