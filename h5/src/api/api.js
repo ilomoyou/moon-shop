@@ -268,6 +268,7 @@ export function addressList(query) {
   return request({
     url: AddressList,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }
@@ -277,6 +278,7 @@ export function addressDetail(query) {
   return request({
     url: AddressDetail,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }
@@ -285,14 +287,16 @@ export function addressSave(data) {
   return request({
     url: AddressSave,
     method: 'post',
+    version: 'v1',
     data
   })
 }
-const AddressDelete='/address/delete'; //保存收货地址
+const AddressDelete='/address/delete'; //删除收货地址
 export function addressDelete(data) {
   return request({
     url: AddressDelete,
     method: 'post',
+    version: 'v1',
     data
   })
 }
