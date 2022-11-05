@@ -12,7 +12,6 @@ use App\Services\AddressService;
 use App\util\ResponseCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class AddressController extends BaseController
 {
@@ -23,16 +22,6 @@ class AddressController extends BaseController
     public function list()
     {
         $list = Address::getAddressListByUserId($this->user()->id);
-        // 转驼峰
-        $list = $list->map(function (Address $address) {
-            $item = [];
-            $address = $address->toArray();
-            foreach ($address as $key => $value) {
-                $key = lcfirst(Str::studly($key));
-                $item[$key] = $value;
-            }
-            return $item;
-        });
         return $this->success([
             'page' => 1,
             'pages' => 1,

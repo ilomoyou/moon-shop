@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Wx\AddressController;
 use App\Http\Controllers\Wx\AuthController;
+use App\Http\Controllers\Wx\CatalogController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('auth/register', [AuthController::class, 'register']); // 账号注册
@@ -17,3 +18,7 @@ Route::get('address/list', [AddressController::class, 'list']); // 收货地址�
 Route::get('address/detail', [AddressController::class, 'detail']); // 收货地址详情
 Route::post('address/save', [AddressController::class, 'save']); // 保存收货地址
 Route::post('address/delete', [AddressController::class, 'delete']); // 删除收货地址
+
+# 商品模块-类目
+Route::get('/catalog/index', [CatalogController::class, 'index']); // 分类目录全部分类
+Route::get('/catalog/current', [CatalogController::class, 'current']); // 分类目录当前分类

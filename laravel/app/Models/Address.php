@@ -5,18 +5,12 @@ namespace App\Models;
 use App\Exceptions\BusinessException;
 use App\util\ResponseCode;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
-class Address extends Model
+class Address extends BaseModel
 {
     protected $table = 'address';
 
-    public const CREATED_AT = 'add_time';
-
-    public const UPDATED_AT = 'update_time';
-
     protected $casts = [
-        'deleted' => 'boolean',
         'is_default' => 'boolean'
     ];
 
