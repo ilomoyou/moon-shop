@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Wx;
 
 
 use App\Exceptions\BusinessException;
-use App\Exceptions\ParametersException;
+use App\Exceptions\NotFoundException;
 use App\Http\Requests\AddressRequest;
 use App\Models\Address;
 use App\Services\AddressService;
@@ -35,7 +35,7 @@ class AddressController extends BaseController
      * 保存地址
      * @param  AddressRequest  $request
      * @return JsonResponse
-     * @throws ParametersException
+     * @throws NotFoundException
      */
     public function save(AddressRequest $request)
     {
@@ -48,7 +48,7 @@ class AddressController extends BaseController
      * 用户地址详情
      * @param  Request  $request
      * @return JsonResponse
-     * @throws ParametersException
+     * @throws NotFoundException
      */
     public function detail(Request $request)
     {
@@ -58,7 +58,7 @@ class AddressController extends BaseController
         }
         $address = Address::getAddress($this->user()->id, $id);
         if (empty($address)) {
-            throw new ParametersException('用户地址不存在');
+            throw new NotFoundException('address is not found');
         }
         return $this->success($address->toArray());
     }

@@ -11,6 +11,7 @@ class ResponseCode
     const FAIL = [-1, '请求错误!'];
     const PARAM_ERROR = [400, '参数错误'];
     const PARAM_ILLEGAL = [401, '参数不合法'];
+    const RESOURCE_NOT_FOUND = [404, '资源未找到'];
     const UN_AUTHORIZATION = [501, '未授权!'];
     const UPDATED_FAIL = [505, '更新数据失败'];
 

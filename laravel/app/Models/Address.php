@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use App\Exceptions\BusinessException;
-use App\util\ResponseCode;
+use App\Exceptions\NotFoundException;
 use Illuminate\Database\Eloquent\Collection;
 
 class Address extends BaseModel
@@ -45,13 +44,13 @@ class Address extends BaseModel
      * @param $userId
      * @param $addressId
      * @return bool|null
-     * @throws BusinessException
+     * @throws NotFoundException
      */
     public static function remove($userId, $addressId)
     {
         $address = Address::getAddress($userId, $addressId);
         if (is_null($address)) {
-            throw new BusinessException(ResponseCode::PARAM_ILLEGAL);
+            throw new NotFoundException('address is not found');
         }
         return $address->delete();
     }

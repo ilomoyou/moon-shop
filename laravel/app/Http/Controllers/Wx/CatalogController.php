@@ -4,7 +4,7 @@
 namespace App\Http\Controllers\Wx;
 
 
-use App\Exceptions\ParametersException;
+use App\Exceptions\NotFoundException;
 use App\Models\Category;
 use App\util\ResponseCode;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +18,7 @@ class CatalogController extends BaseController
      * 获取全部分类列表
      * @param  Request  $request
      * @return JsonResponse
-     * @throws ParametersException
+     * @throws NotFoundException
      */
     public function index(Request $request)
     {
@@ -31,7 +31,7 @@ class CatalogController extends BaseController
         }
 
         if (empty($current)) {
-            throw new ParametersException('category is not found');
+            throw new NotFoundException('category is not found');
         }
         $l2List = Category::getL2ListByPid($current->id);
 
@@ -46,7 +46,7 @@ class CatalogController extends BaseController
      * 获取当前分类列表
      * @param  Request  $request
      * @return JsonResponse
-     * @throws ParametersException
+     * @throws NotFoundException
      */
     public function current(Request $request)
     {
@@ -57,7 +57,7 @@ class CatalogController extends BaseController
 
         $category = Category::getL1ById($id);
         if (empty($category)) {
-            throw new ParametersException('category is not found');
+            throw new NotFoundException('category is not found');
         }
 
         $l2List = Category::getL2ListByPid($category->id);

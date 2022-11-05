@@ -4,7 +4,7 @@
 namespace App\Services;
 
 
-use App\Exceptions\ParametersException;
+use App\Exceptions\NotFoundException;
 use App\Models\Address;
 
 class AddressService extends BaseService
@@ -14,13 +14,13 @@ class AddressService extends BaseService
      * @param $userId
      * @param  array  $data
      * @return Address|null
-     * @throws ParametersException
+     * @throws NotFoundException
      */
     public function saveAddress($userId, array $data) {
         if (isset($data['id']) && !is_null($data['id'])) {
             $address = Address::getAddress($userId, $data['id']);
             if (empty($address)) {
-                throw new ParametersException('address not found');
+                throw new NotFoundException('address not found');
             }
         } else {
             $address = new Address();
