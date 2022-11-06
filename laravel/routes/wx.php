@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Wx\AddressController;
 use App\Http\Controllers\Wx\AuthController;
+use App\Http\Controllers\Wx\BrandController;
 use App\Http\Controllers\Wx\CatalogController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,3 +23,7 @@ Route::post('address/delete', [AddressController::class, 'delete']); // 删除�
 # 商品模块-类目
 Route::get('/catalog/index', [CatalogController::class, 'index']); // 分类目录全部分类
 Route::get('/catalog/current', [CatalogController::class, 'current']); // 分类目录当前分类
+
+# 商品模块-品牌
+Route::get('brand/list', [BrandController::class, 'list']); // 品牌列表
+Route::get('brand/detail', [BrandController::class, 'detail']); // 品牌详情

@@ -4,7 +4,6 @@
 namespace App\Http\Controllers\Wx;
 
 
-use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
 use App\Http\Requests\AddressRequest;
 use App\Models\Address;
@@ -22,13 +21,7 @@ class AddressController extends BaseController
     public function list()
     {
         $list = Address::getAddressListByUserId($this->user()->id);
-        return $this->success([
-            'page' => 1,
-            'pages' => 1,
-            'limit' => $list->count(),
-            'total' => $list->count(),
-            'list' => $list->toArray()
-        ]);
+        return $this->successPaginate($list);
     }
 
     /**
@@ -67,7 +60,7 @@ class AddressController extends BaseController
      * 删除地址
      * @param  Request  $request
      * @return JsonResponse
-     * @throws BusinessException
+     * @throws NotFoundException
      */
     public function delete(Request $request)
     {

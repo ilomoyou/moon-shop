@@ -7,6 +7,9 @@ namespace App\Http\Controllers\Wx;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\util\ResponseCode;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class BaseController extends Controller
@@ -27,7 +30,51 @@ class BaseController extends Controller
         $this->middleware('auth:wx', $option);
     }
 
-    protected function codeReturn(array $responseCode, $data = null, $info = '')
+    /**
+     * 成功统一返回格式
+     * @param  null  $data 成功返回的数据
+     * @return JsonResponse
+     */
+    protected function success($data = null)
+    {
+        return $this->codeReturn(ResponseCode::SUCCESS, $data);
+    }
+
+    /**
+     * 失败统一返回格式
+     * @param  array  $responseCode 响应状态码
+     * @param  string  $info 错误信息
+     * @return JsonResponse
+     */
+    protected function fail(array $responseCode = ResponseCode::FAIL, string $info = '')
+    {
+        return $this->codeReturn($responseCode, null, $info);
+    }
+
+    /**
+     * 成功|失败统一返回格式
+     * @param  bool  $isSuccess 成功|失败结果
+     * @param  array  $responseCode 响应状态码
+     * @param  null  $data 成功返回的数据
+     * @param  string  $info 失败返回的错误信息
+     * @return JsonResponse
+     */
+    protected function failOrSuccess(bool $isSuccess, array $responseCode = ResponseCode::FAIL, $data = null, $info = '')
+    {
+        if ($isSuccess) {
+            return $this->success($data);
+        }
+        return $this->fail($responseCode, $info);
+    }
+
+    /**
+     * 统一格式返回处理
+     * @param  array  $responseCode 响应状态码
+     * @param  null  $data 需要返回的数据
+     * @param  string  $info 需要返回的提示信息
+     * @return JsonResponse
+     */
+    protected function codeReturn(array $responseCode, $data = null, string $info = '')
     {
         list($errno, $errmsg) = $responseCode;
         $ret = ['errno' => $errno, 'errmsg' => $info ?: $errmsg];
@@ -42,25 +89,53 @@ class BaseController extends Controller
         return response()->json($ret);
     }
 
-    protected function success($data = null)
+    /**
+     * 成功统一返回分页数据格式
+     * @param $page
+     * @return JsonResponse
+     */
+    protected function successPaginate($page)
     {
-        return $this->codeReturn(ResponseCode::SUCCESS, $data);
-    }
-
-    protected function fail(array $responseCode = ResponseCode::FAIL, $info = '')
-    {
-        return $this->codeReturn($responseCode, null, $info);
-    }
-
-    protected function failOrSuccess($isSuccess, array $responseCode = ResponseCode::FAIL, $data = null, $info = '')
-    {
-        if ($isSuccess) {
-            return $this->success($data);
-        }
-        return $this->fail($responseCode, $info);
+        return $this->success($this->paginate($page));
     }
 
     /**
+     * 分页数据封装
+     * @param $page
+     * @return array
+     */
+    protected function paginate($page)
+    {
+        if ($page instanceof LengthAwarePaginator) {
+            return [
+                'total' => $page->total(),
+                'page' => $page->currentPage(),
+                'limit' => $page->perPage(),
+                'pages' => $page->lastPage(),
+                'list' => $page->items()
+            ];
+        }
+
+        if ($page instanceof Collection) {
+            $page = $page->toArray();
+        }
+
+        if (!is_array($page)) {
+            return $page;
+        }
+
+        $total = count($page);
+        return [
+            'total' => $total,
+            'page' => 1,
+            'limit' => $total,
+            'pages' => 1,
+            'list' => $page
+        ];
+    }
+
+    /**
+     * 鉴权后获取用户信息
      * @return User|null
      */
     protected function user()

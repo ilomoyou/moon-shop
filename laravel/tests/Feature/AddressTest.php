@@ -12,7 +12,6 @@ class AddressTest extends TestCase
 
     public function testList()
     {
-        dd($this->getAuthHeader());
         $response = $this->get('wx/address/list', $this->getAuthHeader());
         dd($response->getOriginalContent());
     }
