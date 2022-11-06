@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a9b62c45a2fa7c11d35260f026eeb78f",
+    "content-hash": "164d8d803542b9e112bd52cb8819968b",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2233,6 +2233,69 @@
                 }
             ],
             "time": "2022-03-20T15:13:45+00:00"
+        },
+        {
+            "name": "overtrue/laravel-query-logger",
+            "version": "2.1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/overtrue/laravel-query-logger.git",
+                "reference": "46b546aa2c4f6319ce798c8f8128b08718b32bae"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/overtrue/laravel-query-logger/zipball/46b546aa2c4f6319ce798c8f8128b08718b32bae",
+                "reference": "46b546aa2c4f6319ce798c8f8128b08718b32bae",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "laravel/framework": "~5.5||~6.0||~7.0||~8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Overtrue\\LaravelQueryLogger\\ServiceProvider"
+                    ]
+                },
+                "hooks": {
+                    "pre-commit": [
+                        "composer test",
+                        "composer fix-style"
+                    ],
+                    "pre-push": [
+                        "composer test",
+                        "composer check-style"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Overtrue\\LaravelQueryLogger\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "overtrue",
+                    "email": "anzhengchao@gmail.com"
+                }
+            ],
+            "description": "A dev tool to log all queries for laravel application.",
+            "support": {
+                "issues": "https://github.com/overtrue/laravel-query-logger/issues",
+                "source": "https://github.com/overtrue/laravel-query-logger/tree/2.1.4"
+            },
+            "time": "2021-08-12T08:49:45+00:00"
         },
         {
             "name": "phpoption/phpoption",
