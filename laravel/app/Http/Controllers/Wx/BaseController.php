@@ -142,4 +142,22 @@ class BaseController extends Controller
     {
         return Auth::guard('wx')->user();
     }
+
+    /**
+     * 判断是否登录
+     * @return bool
+     */
+    protected function isLogin()
+    {
+        return !is_null($this->user());
+    }
+
+    /**
+     * 获取用户ID
+     * @return mixed
+     */
+    protected function userId()
+    {
+        return $this->user()->getAuthIdentifier();
+    }
 }

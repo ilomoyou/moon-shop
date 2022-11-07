@@ -4,6 +4,8 @@
 namespace App\Models;
 
 
+use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -30,6 +32,16 @@ class BaseModel extends Model
         }, $keys);
         $values = array_values($items);
         return array_combine($humpKeys, $values);
+    }
+
+    /**
+     * 重写方法 统一返回时间格式
+     * @param  DateTimeInterface  $date
+     * @return string
+     */
+    public function serializeDate(DateTimeInterface $date)
+    {
+        return Carbon::instance($date)->toDateTimeString();
     }
 
 }

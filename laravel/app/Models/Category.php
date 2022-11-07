@@ -48,4 +48,30 @@ class Category extends BaseModel
             ->where('deleted', 0)
             ->first();
     }
+
+    /**
+     * 根据ID获取对应类目
+     * @param $id
+     * @return Category[]|Collection|Model|null
+     */
+    public static function getCategoryById($id)
+    {
+        return Category::query()->where('deleted', 0)->find($id);
+    }
+
+    /**
+     * 根据多个ID获取二级类目列表
+     * @param  array  $ids
+     * @return Category[]|Collection
+     */
+    public static function getL2ListByIds(array $ids)
+    {
+        if (empty($ids)) {
+            return Collection::empty();
+        }
+        return Category::query()
+            ->where('deleted', 0)
+            ->where('level', 'L2')
+            ->whereIn('id', $ids)->get();
+    }
 }

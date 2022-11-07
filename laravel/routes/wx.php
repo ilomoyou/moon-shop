@@ -4,6 +4,7 @@ use App\Http\Controllers\Wx\AddressController;
 use App\Http\Controllers\Wx\AuthController;
 use App\Http\Controllers\Wx\BrandController;
 use App\Http\Controllers\Wx\CatalogController;
+use App\Http\Controllers\Wx\GoodsController;
 use Illuminate\Support\Facades\Route;
 
 # 用户模块-鉴权
@@ -35,4 +36,12 @@ Route::prefix('catalog')->group(function () {
 Route::prefix('brand')->group(function () {
     Route::get('/list', [BrandController::class, 'list']); // 品牌列表
     Route::get('/detail', [BrandController::class, 'detail']); // 品牌详情
+});
+
+# 商品模块-商品
+Route::prefix('goods')->group(function () {
+    Route::get('/list', [GoodsController::class, 'list']); // 商品列表
+    Route::get('/detail'); // 商品详情
+    Route::get('/count', [GoodsController::class, 'count']); // 统计商品总数
+    Route::get('/category', [GoodsController::class, 'category']); // 当前分类
 });
