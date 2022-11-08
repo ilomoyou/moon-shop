@@ -41,7 +41,7 @@ Route::prefix('brand')->group(function () {
 # 商品模块-商品
 Route::prefix('goods')->group(function () {
     Route::get('/list', [GoodsController::class, 'list']); // 商品列表
-    Route::get('/detail'); // 商品详情
+    Route::get('/detail', [GoodsController::class, 'detail']); // 商品详情
     Route::get('/count', [GoodsController::class, 'count']); // 统计商品总数
     Route::get('/category', [GoodsController::class, 'category']); // 当前分类
 });

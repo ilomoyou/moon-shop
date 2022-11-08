@@ -6,8 +6,13 @@ namespace App\Http\Controllers\Wx;
 
 use App\enum\SearchHistoryFromEnum;
 use App\Exceptions\NotFoundException;
+use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Collect;
 use App\Models\Goods;
+use App\Models\Issue;
+use App\Services\CommentService;
+use App\Services\FootprintService;
 use App\Services\GoodsService;
 use App\Services\SearchHistoryService;
 use App\util\ResponseCode;
@@ -46,12 +51,62 @@ class GoodsController extends BaseController
         }
 
         $columns = ['id', 'name', 'brief', 'pic_url', 'is_new', 'is_hot', 'counter_price', 'retail_price'];
-        $goodList = GoodsService::getInstance()->getGoodList($categoryId, $brandId, $isNew, $isHot, $keyword, $columns, $sort, $order, $page, $limit);
+        $goodsList = GoodsService::getInstance()->getGoodsList($categoryId, $brandId, $isNew, $isHot, $keyword, $columns, $sort, $order, $page, $limit);
         $categoryList = GoodsService::getInstance()->getL2CategoryList($brandId, $isNew, $isHot, $keyword);
 
-        $goodList = $this->paginate($goodList);
-        $goodList['filterCategoryList'] = $categoryList;
-        return $this->success($goodList);
+        $goodsList = $this->paginate($goodsList);
+        $goodsList['filterCategoryList'] = $categoryList;
+        return $this->success($goodsList);
+    }
+
+    /**
+     * 获取商品详情信息
+     * @param  Request  $request
+     * @return JsonResponse
+     * @throws NotFoundException
+     */
+    public function detail(Request $request)
+    {
+        $id = $request->input('id');
+        if (empty($id)) {
+            return $this->fail(ResponseCode::PARAM_ILLEGAL);
+        }
+
+        $goods = Goods::getGoodsById($id);
+        if (empty($goods)) {
+            throw new NotFoundException('good is not found');
+        }
+
+        $attribute = $goods->getGoodsAttribute();
+        $spec = $goods->getGoodsSpecification();
+        $product = $goods->getGoodsProduct();
+        $issue = Issue::getGoodsIssueList();
+        $brand = $goods->brand_id ? Brand::getBrand($goods->brand_id) : (object) [];
+        $comment = CommentService::getInstance()->getCommentWithUserInfo($goods->id);
+
+        // 用户收藏
+        $userHasCollect = 0;
+        if ($this->isLogin()) {
+            $userHasCollect = Collect::countByGoodsId($this->userId(), $id);
+            FootprintService::getInstance()->saveFootprint($this->userId(), $id);
+        }
+
+        // todo 团购信息
+        // todo 系统配置
+
+        return $this->success([
+            'info' => $goods,
+            'userHasCollect' => $userHasCollect,
+            'issue' => $issue,
+            'comment' => $comment,
+            'specificationList' => $spec,
+            'productList' => $product,
+            'attribute' => $attribute,
+            'brand' => $brand,
+            'groupon' => [],
+            'share' => false,
+            'shareImage' => $goods->share_url
+        ]);
     }
 
     /**

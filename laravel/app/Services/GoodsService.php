@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class GoodsService extends BaseService
 {
-    public function getGoodList($categoryId, $brandId, $isNew, $isHot, $keyword, $columns = ['*'], $sort = 'add_time', $order = 'desc', $page = 1, $limit = 10)
+    public function getGoodsList($categoryId, $brandId, $isNew, $isHot, $keyword, $columns = ['*'], $sort = 'add_time', $order = 'desc', $page = 1, $limit = 10)
     {
         $query = $this->getQueryByGoodsFilter($brandId, $isNew, $isHot, $keyword);
         if (!empty($categoryId)) {

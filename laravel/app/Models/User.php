@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -46,6 +47,19 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
 
     ];
+
+    /**
+     * 根据多个ID获取用户列表
+     * @param  array  $userIds
+     * @return User[]|Collection
+     */
+    public static function getUsersByIds(array $userIds)
+    {
+        if (empty($userIds)) {
+            return collect([]);
+        }
+        return User::query()->whereIn('id', $userIds)->where('deleted', 0)->get();
+    }
 
     /**
      * 根据用户名获取用户
