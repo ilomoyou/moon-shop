@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Wx;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\util\ResponseCode;
+use App\Verify\VerifyRequestInput;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Auth;
 
 class BaseController extends Controller
 {
+    use VerifyRequestInput;
+
     protected $only;
     protected $except;
 

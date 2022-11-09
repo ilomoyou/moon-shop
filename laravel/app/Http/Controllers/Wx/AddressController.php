@@ -5,12 +5,11 @@ namespace App\Http\Controllers\Wx;
 
 
 use App\Exceptions\NotFoundException;
+use App\Exceptions\ParametersException;
 use App\Http\Requests\AddressRequest;
 use App\Models\Address;
 use App\Services\AddressService;
-use App\util\ResponseCode;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class AddressController extends BaseController
 {
@@ -39,16 +38,13 @@ class AddressController extends BaseController
 
     /**
      * 用户地址详情
-     * @param  Request  $request
      * @return JsonResponse
      * @throws NotFoundException
+     * @throws ParametersException
      */
-    public function detail(Request $request)
+    public function detail()
     {
-        $id = $request->input('id');
-        if (empty($id) && !is_numeric($id)) {
-            return $this->fail(ResponseCode::PARAM_ILLEGAL);
-        }
+        $id = $this->verifyIdMust('id');
         $address = Address::getAddress($this->user()->id, $id);
         if (empty($address)) {
             throw new NotFoundException('address is not found');
@@ -58,16 +54,13 @@ class AddressController extends BaseController
 
     /**
      * 删除地址
-     * @param  Request  $request
      * @return JsonResponse
      * @throws NotFoundException
+     * @throws ParametersException
      */
-    public function delete(Request $request)
+    public function delete()
     {
-        $id = $request->input('id');
-        if (empty($id) || !is_numeric($id)) {
-            return $this->fail(ResponseCode::PARAM_ILLEGAL);
-        }
+        $id = $this->verifyIdMust('id');
         Address::remove($this->user()->id, $id);
         return $this->success();
     }

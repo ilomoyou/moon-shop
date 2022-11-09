@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Wx;
 
 
 use App\Exceptions\BusinessException;
+use App\Exceptions\ParametersException;
 use App\Models\User;
-use App\Rules\MobilePhone;
 use App\Services\AuthService;
 use App\util\ResponseCode;
 use Carbon\Carbon;
@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class AuthController extends BaseController
 {
@@ -38,15 +37,15 @@ class AuthController extends BaseController
 
     /**
      * 用户信息修改
-     * @param  Request  $request
      * @return JsonResponse
+     * @throws ParametersException
      */
-    public function profile(Request $request)
+    public function profile()
     {
         $user = $this->user();
-        $avatar = $request->input('avatar');
-        $gender = $request->input('gender');
-        $nickname = $request->input('nickname');
+        $avatar = $this->verifyString('avatar');
+        $gender = $this->verifyEnum('gender', 0, [0, 1, 2]);
+        $nickname = $this->verifyString('nickname');
 
         if (!empty($avatar)) {
             $user->avatar = $avatar;
@@ -73,16 +72,15 @@ class AuthController extends BaseController
 
     /**
      * 密码重置
-     * @param  Request  $request
      * @return JsonResponse
      * @throws BusinessException
+     * @throws ParametersException
      */
-    public function reset(Request $request)
+    public function reset()
     {
-        $password = $request->input('password');
-        $mobile = $request->input('mobile');
-        $code = $request->input('code');
-
+        $password = $this->verifyString('password');
+        $mobile = $this->verifyMobilePhoneMust('mobile');
+        $code = $this->verifyInteger('code');
         if (empty($password) || empty($mobile) || empty($code)) {
             return $this->fail(ResponseCode::PARAM_ILLEGAL);
         }
@@ -106,11 +104,12 @@ class AuthController extends BaseController
      * 账号登录
      * @param  Request  $request
      * @return JsonResponse
+     * @throws ParametersException
      */
     public function login(Request $request)
     {
-        $username = $request->input('username');
-        $password = $request->input('password');
+        $username = $this->verifyString('username');
+        $password = $this->verifyString('password');
         if (empty($username) || empty($password)) {
             return $this->fail(ResponseCode::PARAM_ILLEGAL);
         }
@@ -148,15 +147,15 @@ class AuthController extends BaseController
      * @param  Request  $request
      * @return JsonResponse
      * @throws BusinessException
+     * @throws ParametersException
      */
     public function register(Request $request)
     {
         // 获取参数
-        $username = $request->input('username');
-        $password = $request->input('password');
-        $mobile = $request->input('mobile');
-        $code = $request->input('code');
-
+        $username = $this->verifyString('username');
+        $password = $this->verifyString('password');
+        $mobile = $this->verifyMobilePhoneMust('mobile');
+        $code = $this->verifyInteger('code');
         // 校验参数是否为空
         if (empty($username) || empty($password) || empty($mobile) || empty($code)) {
             return $this->fail(ResponseCode::PARAM_ILLEGAL);
@@ -166,10 +165,6 @@ class AuthController extends BaseController
         $user = User::getByUsername($username);
         if (!is_null($user)) {
             return $this->fail(ResponseCode::AUTH_NAME_REGISTERED);
-        }
-        $validator = Validator::make(['mobile' => $mobile], ['mobile' => new MobilePhone]);
-        if ($validator->fails()) {
-            return $this->fail(ResponseCode::AUTH_INVALID_MOBILE);
         }
         $user = User::getByMobile($mobile);
         if (!is_null($user)) {
@@ -204,23 +199,13 @@ class AuthController extends BaseController
 
     /**
      * 发送注册短信验证码
-     * @param  Request  $request
      * @return array
+     * @throws ParametersException
      */
-    public function regCaptcha(Request $request)
+    public function regCaptcha()
     {
         // 获取手机号
-        $mobile = $request->input('mobile');
-
-        // 验证手机号是否合法
-        if (empty($mobile)) {
-            $this->fail(ResponseCode::PARAM_ILLEGAL);
-        }
-        $validator = Validator::make(['mobile' => $mobile], ['mobile' => new MobilePhone]);
-        if ($validator->fails()) {
-            return $this->fail(ResponseCode::AUTH_INVALID_MOBILE);
-        }
-
+        $mobile = $this->verifyMobilePhoneMust('mobile');
         // 验证手机号是否已经被注册
         $user = User::getByMobile($mobile);
         if (!is_null($user)) {

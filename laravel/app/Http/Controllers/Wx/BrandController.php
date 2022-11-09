@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Wx;
 
 
 use App\Exceptions\NotFoundException;
+use App\Exceptions\ParametersException;
 use App\Models\Brand;
-use App\util\ResponseCode;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class BrandController extends BaseController
 {
@@ -16,15 +15,15 @@ class BrandController extends BaseController
 
     /**
      * 获取品牌列表
-     * @param  Request  $request
      * @return JsonResponse
+     * @throws ParametersException
      */
-    public function list(Request $request)
+    public function list()
     {
-        $page = $request->input('page', 1);
-        $limit = $request->input('limit', 10);
-        $sort = $request->input('sort', 'add_time');
-        $order = $request->input('order', 'desc');
+        $page = $this->verifyInteger('page', 1);
+        $limit = $this->verifyPerPageLimit('limit', 10);
+        $sort = $this->verifyEnum('sort', 'add_time', ['sort_order', 'name', 'add_time']);
+        $order = $this->verifySortValues('order', 'desc');
 
         $columns = ['id', 'name', 'desc', 'pic_url', 'floor_price'];
         $list = Brand::getBrandList($page, $limit, $sort, $order, $columns);
@@ -33,17 +32,13 @@ class BrandController extends BaseController
 
     /**
      * 获取品牌详情
-     * @param  Request  $request
      * @return JsonResponse
      * @throws NotFoundException
+     * @throws ParametersException
      */
-    public function detail(Request $request)
+    public function detail()
     {
-        $id = $request->input('id', 0);
-        if (empty($id)) {
-            return $this->fail(ResponseCode::PARAM_ILLEGAL);
-        }
-
+        $id = $this->verifyIdMust('id');
         $brand = Brand::getBrand($id);
         if (is_null($brand)) {
             throw new NotFoundException('brand is not found');

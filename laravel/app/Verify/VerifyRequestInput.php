@@ -5,6 +5,7 @@ namespace App\Verify;
 
 
 use App\Exceptions\ParametersException;
+use App\Rules\MobilePhone;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -20,6 +21,17 @@ trait VerifyRequestInput
     public function verifyId($key, $default = null)
     {
         return $this->verifyData($key, $default, 'integer|digits_between:1,20');
+    }
+
+    /**
+     * 验证ID必填
+     * @param $key
+     * @param  null  $default
+     * @return mixed|null
+     * @throws ParametersException
+     */
+    public function verifyIdMust($key, $default = null) {
+        return $this->verifyData($key, $default, 'required|integer|digits_between:1,20', true);
     }
 
     /**
@@ -96,18 +108,31 @@ trait VerifyRequestInput
     }
 
     /**
-     * 参数校验统一处理
+     * 验证手机号
      * @param $key
-     * @param $default
-     * @param $rule
+     * @param  null  $default
      * @return mixed|null
      * @throws ParametersException
      */
-    private function verifyData($key, $default, $rule)
+    public function verifyMobilePhoneMust($key, $default = null)
+    {
+        return $this->verifyData($key, $default, ['required', new MobilePhone], true);
+    }
+
+    /**
+     * 参数校验统一处理
+     * @param  string|null  $key 请求字段
+     * @param mixed $default 默认值
+     * @param $rule: 校验规则
+     * @param  bool  $required 是否必填
+     * @return mixed|null
+     * @throws ParametersException
+     */
+    private function verifyData(?string $key, $default, $rule, bool $required = false)
     {
         $value = request()->input($key, $default);
         $validator = Validator::make([$key => $value], [$key => $rule]);
-        if (is_null($default) && is_null($value)) {
+        if (is_null($default) && is_null($value) && !$required) {
             return null;
         }
         if ($validator->fails()) {

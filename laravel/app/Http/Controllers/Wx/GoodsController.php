@@ -16,13 +16,10 @@ use App\Services\CommentService;
 use App\Services\FootprintService;
 use App\Services\GoodsService;
 use App\Services\SearchHistoryService;
-use App\Verify\VerifyRequestInput;
 use Illuminate\Http\JsonResponse;
 
 class GoodsController extends BaseController
 {
-    use VerifyRequestInput;
-
     protected $only = [];
 
     /**
@@ -67,7 +64,7 @@ class GoodsController extends BaseController
      */
     public function detail()
     {
-        $id = $this->verifyId('id');
+        $id = $this->verifyIdMust('id');
         $goods = Goods::getGoodsById($id);
         if (empty($goods)) {
             throw new NotFoundException('good is not found');
@@ -123,7 +120,7 @@ class GoodsController extends BaseController
      */
     public function category()
     {
-        $id = $this->verifyId('id');
+        $id = $this->verifyIdMust('id');
         $current = Category::getCategoryById($id);
         if (empty($current)) {
             throw new NotFoundException('category is not found');
