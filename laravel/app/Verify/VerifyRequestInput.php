@@ -4,6 +4,7 @@
 namespace App\Verify;
 
 
+use App\enum\GenderEnum;
 use App\Exceptions\ParametersException;
 use App\Rules\MobilePhone;
 use Illuminate\Support\Facades\Validator;
@@ -93,6 +94,18 @@ trait VerifyRequestInput
     public function verifySortValues($key, $default = null)
     {
         return $this->verifyData($key, $default, Rule::in(['desc', 'asc']));
+    }
+
+    /**
+     * 验证性别
+     * @param $key
+     * @param  null  $default
+     * @return mixed|null
+     * @throws ParametersException
+     */
+    public function verifyGenderValues($key, $default = null)
+    {
+        return $this->verifyData($key, $default, Rule::in([GenderEnum::UNKNOWN, GenderEnum::MAN, GenderEnum::WOMAN]));
     }
 
     /**

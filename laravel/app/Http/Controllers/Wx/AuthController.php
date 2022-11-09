@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\Wx;
 
 
+use App\enum\GenderEnum;
 use App\Exceptions\BusinessException;
 use App\Exceptions\ParametersException;
 use App\Models\User;
@@ -44,7 +45,7 @@ class AuthController extends BaseController
     {
         $user = $this->user();
         $avatar = $this->verifyString('avatar');
-        $gender = $this->verifyEnum('gender', 0, [0, 1, 2]);
+        $gender = $this->verifyGenderValues('gender', GenderEnum::UNKNOWN);
         $nickname = $this->verifyString('nickname');
 
         if (!empty($avatar)) {
