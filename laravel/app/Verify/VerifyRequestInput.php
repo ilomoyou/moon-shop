@@ -25,17 +25,6 @@ trait VerifyRequestInput
     }
 
     /**
-     * 验证ID必填
-     * @param $key
-     * @param  null  $default
-     * @return mixed|null
-     * @throws ParametersException
-     */
-    public function verifyIdMust($key, $default = null) {
-        return $this->verifyData($key, $default, 'required|integer|digits_between:1,20', true);
-    }
-
-    /**
      * 验证整数
      * @param $key
      * @param  null  $default
@@ -87,11 +76,11 @@ trait VerifyRequestInput
     /**
      * 验证排序 升序|降序
      * @param $key
-     * @param  null  $default
+     * @param  string  $default
      * @return mixed|null
      * @throws ParametersException
      */
-    public function verifySortValues($key, $default = null)
+    public function verifySortValues($key, string $default = 'desc')
     {
         return $this->verifyData($key, $default, Rule::in(['desc', 'asc']));
     }
@@ -111,11 +100,11 @@ trait VerifyRequestInput
     /**
      * 分页每页数量限制
      * @param $key
-     * @param  null  $default
+     * @param  int  $default
      * @return mixed|null
      * @throws ParametersException
      */
-    public function verifyPerPageLimit($key, $default = null)
+    public function verifyPerPageLimit($key, int $default = 10)
     {
         return $this->verifyData($key, $default, 'integer|max:100');
     }
@@ -127,26 +116,26 @@ trait VerifyRequestInput
      * @return mixed|null
      * @throws ParametersException
      */
-    public function verifyMobilePhoneMust($key, $default = null)
+    public function verifyMobilePhone($key, $default = null)
     {
-        return $this->verifyData($key, $default, ['required', new MobilePhone], true);
+        return $this->verifyData($key, $default, new MobilePhone());
     }
 
     /**
      * 参数校验统一处理
-     * @param  string|null  $key 请求字段
-     * @param mixed $default 默认值
-     * @param $rule: 校验规则
-     * @param  bool  $required 是否必填
-     * @return mixed|null
+     * @param $key
+     * @param $default
+     * @param $rule
+     * @param  array  $message
+     * @return mixed
      * @throws ParametersException
      */
-    private function verifyData(?string $key, $default, $rule, bool $required = false)
+    private function verifyData($key, $default, $rule, array $message = [])
     {
         $value = request()->input($key, $default);
-        $validator = Validator::make([$key => $value], [$key => $rule]);
-        if (is_null($default) && is_null($value) && !$required) {
-            return null;
+        $validator = Validator::make([$key => $value], [$key => $rule], $message);
+        if (is_null($default) && is_null($value)) {
+            throw new ParametersException("$key 不能为空");
         }
         if ($validator->fails()) {
             throw new ParametersException($validator->errors()->first());

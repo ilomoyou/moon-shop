@@ -29,15 +29,15 @@ class GoodsController extends BaseController
      */
     public function list()
     {
-        $categoryId = $this->verifyId('categoryId');
-        $brandId = $this->verifyId('brandId');
-        $keyword = $this->verifyString('keyword');
-        $isNew = $this->verifyBoolean('isNew');
-        $isHot = $this->verifyBoolean('isHot');
+        $categoryId = $this->verifyId('categoryId', '');
+        $brandId = $this->verifyId('brandId', '');
+        $keyword = $this->verifyString('keyword', '');
+        $isNew = $this->verifyBoolean('isNew', '');
+        $isHot = $this->verifyBoolean('isHot', '');
         $page = $this->verifyInteger('page', 1);
-        $limit = $this->verifyPerPageLimit('limit', 10);
+        $limit = $this->verifyPerPageLimit('limit');
         $sort = $this->verifyEnum('sort', 'add_time', ['add_time', 'retail_price', 'name']);
-        $order = $this->verifySortValues('order', 'desc');
+        $order = $this->verifySortValues('order');
 
         // 保存搜索历史关键字
         if ($this->isLogin() && !empty($keyword)) {
@@ -64,7 +64,7 @@ class GoodsController extends BaseController
      */
     public function detail()
     {
-        $id = $this->verifyIdMust('id');
+        $id = $this->verifyId('id');
         $goods = Goods::getGoodsById($id);
         if (empty($goods)) {
             throw new NotFoundException('good is not found');
@@ -120,7 +120,7 @@ class GoodsController extends BaseController
      */
     public function category()
     {
-        $id = $this->verifyIdMust('id');
+        $id = $this->verifyId('id');
         $current = Category::getCategoryById($id);
         if (empty($current)) {
             throw new NotFoundException('category is not found');

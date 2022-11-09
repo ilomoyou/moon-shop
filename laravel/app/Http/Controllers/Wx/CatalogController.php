@@ -21,7 +21,7 @@ class CatalogController extends BaseController
      */
     public function index()
     {
-        $id = $this->verifyId('id', 0);
+        $id = $this->verifyId('id', '');
         $l1List = Category::getL1List();
         if (empty($id)) {
             $current = $l1List->first();
@@ -49,7 +49,7 @@ class CatalogController extends BaseController
      */
     public function current()
     {
-        $id = $this->verifyIdMust('id');
+        $id = $this->verifyId('id');
         $category = Category::getL1ById($id);
         if (empty($category)) {
             throw new NotFoundException('category is not found');

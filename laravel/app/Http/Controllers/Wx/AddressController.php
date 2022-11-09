@@ -44,7 +44,7 @@ class AddressController extends BaseController
      */
     public function detail()
     {
-        $id = $this->verifyIdMust('id');
+        $id = $this->verifyId('id');
         $address = Address::getAddress($this->user()->id, $id);
         if (empty($address)) {
             throw new NotFoundException('address is not found');
@@ -60,7 +60,7 @@ class AddressController extends BaseController
      */
     public function delete()
     {
-        $id = $this->verifyIdMust('id');
+        $id = $this->verifyId('id');
         Address::remove($this->user()->id, $id);
         return $this->success();
     }

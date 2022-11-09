@@ -21,9 +21,9 @@ class BrandController extends BaseController
     public function list()
     {
         $page = $this->verifyInteger('page', 1);
-        $limit = $this->verifyPerPageLimit('limit', 10);
+        $limit = $this->verifyPerPageLimit('limit');
         $sort = $this->verifyEnum('sort', 'add_time', ['sort_order', 'name', 'add_time']);
-        $order = $this->verifySortValues('order', 'desc');
+        $order = $this->verifySortValues('order');
 
         $columns = ['id', 'name', 'desc', 'pic_url', 'floor_price'];
         $list = Brand::getBrandList($page, $limit, $sort, $order, $columns);
@@ -38,7 +38,7 @@ class BrandController extends BaseController
      */
     public function detail()
     {
-        $id = $this->verifyIdMust('id');
+        $id = $this->verifyId('id');
         $brand = Brand::getBrand($id);
         if (is_null($brand)) {
             throw new NotFoundException('brand is not found');

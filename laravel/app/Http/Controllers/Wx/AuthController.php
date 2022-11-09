@@ -44,9 +44,9 @@ class AuthController extends BaseController
     public function profile()
     {
         $user = $this->user();
-        $avatar = $this->verifyString('avatar');
+        $avatar = $this->verifyString('avatar', '');
         $gender = $this->verifyGenderValues('gender', GenderEnum::UNKNOWN);
-        $nickname = $this->verifyString('nickname');
+        $nickname = $this->verifyString('nickname', '');
 
         if (!empty($avatar)) {
             $user->avatar = $avatar;
@@ -80,11 +80,8 @@ class AuthController extends BaseController
     public function reset()
     {
         $password = $this->verifyString('password');
-        $mobile = $this->verifyMobilePhoneMust('mobile');
+        $mobile = $this->verifyMobilePhone('mobile');
         $code = $this->verifyInteger('code');
-        if (empty($password) || empty($mobile) || empty($code)) {
-            return $this->fail(ResponseCode::PARAM_ILLEGAL);
-        }
 
         $isPass = AuthService::getInstance()->checkCaptcha($mobile, $code);
         if (!$isPass) {
@@ -111,9 +108,6 @@ class AuthController extends BaseController
     {
         $username = $this->verifyString('username');
         $password = $this->verifyString('password');
-        if (empty($username) || empty($password)) {
-            return $this->fail(ResponseCode::PARAM_ILLEGAL);
-        }
 
         // 账号密码校验
         $user = User::getByUsername($username);
@@ -155,12 +149,8 @@ class AuthController extends BaseController
         // 获取参数
         $username = $this->verifyString('username');
         $password = $this->verifyString('password');
-        $mobile = $this->verifyMobilePhoneMust('mobile');
+        $mobile = $this->verifyMobilePhone('mobile');
         $code = $this->verifyInteger('code');
-        // 校验参数是否为空
-        if (empty($username) || empty($password) || empty($mobile) || empty($code)) {
-            return $this->fail(ResponseCode::PARAM_ILLEGAL);
-        }
 
         // 校验用户是否存在
         $user = User::getByUsername($username);
@@ -206,7 +196,7 @@ class AuthController extends BaseController
     public function regCaptcha()
     {
         // 获取手机号
-        $mobile = $this->verifyMobilePhoneMust('mobile');
+        $mobile = $this->verifyMobilePhone('mobile');
         // 验证手机号是否已经被注册
         $user = User::getByMobile($mobile);
         if (!is_null($user)) {
