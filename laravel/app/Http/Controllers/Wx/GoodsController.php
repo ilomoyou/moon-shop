@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Wx;
 
 use App\enum\SearchHistoryFromEnum;
 use App\Exceptions\NotFoundException;
+use App\Exceptions\ParametersException;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Collect;
@@ -15,32 +16,31 @@ use App\Services\CommentService;
 use App\Services\FootprintService;
 use App\Services\GoodsService;
 use App\Services\SearchHistoryService;
-use App\util\ResponseCode;
+use App\Verify\VerifyRequestInput;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class GoodsController extends BaseController
 {
+    use VerifyRequestInput;
+
     protected $only = [];
 
     /**
      * 获取商品列表
-     * @param  Request  $request
      * @return JsonResponse
+     * @throws ParametersException
      */
-    public function list(Request $request)
+    public function list()
     {
-        $categoryId = $request->input('categoryId');
-        $brandId = $request->input('brandId');
-        $keyword = $request->input('keyword');
-        $isNew = $request->input('isNew');
-        $isHot = $request->input('isHot');
-        $page = $request->input('page', 1);
-        $limit = $request->input('limit', 10);
-        $sort = $request->input('sort', 'add_time');
-        $order = $request->input('order', 'desc');
-
-        // todo 验证参数
+        $categoryId = $this->verifyId('categoryId');
+        $brandId = $this->verifyId('brandId');
+        $keyword = $this->verifyString('keyword');
+        $isNew = $this->verifyBoolean('isNew');
+        $isHot = $this->verifyBoolean('isHot');
+        $page = $this->verifyInteger('page', 1);
+        $limit = $this->verifyPerPageLimit('limit', 10);
+        $sort = $this->verifyEnum('sort', 'add_time', ['add_time', 'retail_price', 'name']);
+        $order = $this->verifySortValues('order', 'desc');
 
         // 保存搜索历史关键字
         if ($this->isLogin() && !empty($keyword)) {
@@ -61,17 +61,13 @@ class GoodsController extends BaseController
 
     /**
      * 获取商品详情信息
-     * @param  Request  $request
      * @return JsonResponse
      * @throws NotFoundException
+     * @throws ParametersException
      */
-    public function detail(Request $request)
+    public function detail()
     {
-        $id = $request->input('id');
-        if (empty($id)) {
-            return $this->fail(ResponseCode::PARAM_ILLEGAL);
-        }
-
+        $id = $this->verifyId('id');
         $goods = Goods::getGoodsById($id);
         if (empty($goods)) {
             throw new NotFoundException('good is not found');
@@ -121,17 +117,13 @@ class GoodsController extends BaseController
 
     /**
      * 根据分类ID获取当前商品分类信息
-     * @param  Request  $request
      * @return JsonResponse
      * @throws NotFoundException
+     * @throws ParametersException
      */
-    public function category(Request $request)
+    public function category()
     {
-        $id = $request->input('id');
-        if (empty($id)) {
-            return $this->fail(ResponseCode::PARAM_ILLEGAL);
-        }
-
+        $id = $this->verifyId('id');
         $current = Category::getCategoryById($id);
         if (empty($current)) {
             throw new NotFoundException('category is not found');
