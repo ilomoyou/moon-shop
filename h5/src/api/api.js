@@ -12,6 +12,7 @@ const CatalogList='/catalog/index'; //分类目录全部分类数据接口
 export function catalogList() {
   return request({
     url: CatalogList,
+    version: 'v1',
     method: 'get'
   })
 }
@@ -21,6 +22,7 @@ export function catalogCurrent(query) {
   return request({
     url: CatalogCurrent,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }
@@ -103,6 +105,7 @@ const GoodsCount='/goods/count'; //统计商品总数
 export function goodsCount() {
   return request({
     url: GoodsCount,
+    version: 'v1',
     method: 'get'
   })
 }
@@ -110,6 +113,7 @@ export const GoodsList='/goods/list'; //获得商品列表
 export function goodsList(query) {
   return request({
     url: GoodsList,
+    version: 'v1',
     method: 'get',
     params: query
   })
@@ -118,6 +122,7 @@ const GoodsCategory='/goods/category'; //获得分类数据
 export function goodsCategory(query) {
   return request({
     url: GoodsCategory,
+    version: 'v1',
     method: 'get',
     params: query
   })
@@ -126,6 +131,7 @@ const GoodsDetail='/goods/detail'; //获得商品的详情
 export function goodsDetail(query) {
   return request({
     url: GoodsDetail,
+    version: 'v1',
     method: 'get',
     params: query
   })
@@ -137,6 +143,7 @@ export function brandList(query) {
   return request({
     url: BrandList,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }
@@ -145,6 +152,7 @@ export function brandDetail(query) {
   return request({
     url: BrandDetail,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }

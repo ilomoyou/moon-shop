@@ -133,7 +133,7 @@ class GoodsController extends BaseController
         return $this->success([
             'parentCategory' => $parent,
             'currentCategory' => $current,
-            'childrenCategory' => $children
+            'brotherCategory' => $children
         ]);
     }
 }
