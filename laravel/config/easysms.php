@@ -32,9 +32,9 @@ return [
 
         // 阿里云
         'aliyun' => [
-            'access_key_id' => 'LTAI4GFB36so2U3u2TrHNsk8',
-            'access_key_secret' => 'vL0xsmAClV7vv9VjXtb5M0t3KEWcan',
-            'sign_name' => '大鱼测试',
+            'access_key_id' => env('EASYSMS_ALIYUN_ACCESS_KEY_ID', ''),
+            'access_key_secret' => env('EASYSMS_ALIYUN_ACCESS_KEY_SECRET', ''),
+            'sign_name' => env('EASYSMS_ALIYUN_SIGN_NAME', ''),
         ],
 
         // ...
