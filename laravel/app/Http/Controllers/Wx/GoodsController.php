@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Wx;
 use App\enum\SearchHistoryFromEnum;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\ParametersException;
+use App\Inputs\GoodsListInput;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Collect;
@@ -29,15 +30,7 @@ class GoodsController extends BaseController
      */
     public function list()
     {
-        $categoryId = $this->verifyId('categoryId', '');
-        $brandId = $this->verifyId('brandId', '');
-        $keyword = $this->verifyString('keyword', '');
-        $isNew = $this->verifyBoolean('isNew', '');
-        $isHot = $this->verifyBoolean('isHot', '');
-        $page = $this->verifyInteger('page', 1);
-        $limit = $this->verifyPerPageLimit('limit');
-        $sort = $this->verifyEnum('sort', 'add_time', ['add_time', 'retail_price', 'name']);
-        $order = $this->verifySortValues('order');
+        $input = GoodsListInput::new();
 
         // 保存搜索历史关键字
         if ($this->isLogin() && !empty($keyword)) {
@@ -48,8 +41,8 @@ class GoodsController extends BaseController
         }
 
         $columns = ['id', 'name', 'brief', 'pic_url', 'is_new', 'is_hot', 'counter_price', 'retail_price'];
-        $goodsList = GoodsService::getInstance()->getGoodsList($categoryId, $brandId, $isNew, $isHot, $keyword, $columns, $sort, $order, $page, $limit);
-        $categoryList = GoodsService::getInstance()->getL2CategoryList($brandId, $isNew, $isHot, $keyword);
+        $goodsList = GoodsService::getInstance()->getGoodsList($input, $columns);
+        $categoryList = GoodsService::getInstance()->getL2CategoryList($input);
 
         $goodsList = $this->paginate($goodsList);
         $goodsList['filterCategoryList'] = $categoryList;
