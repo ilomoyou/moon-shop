@@ -105,9 +105,10 @@ class BaseController extends Controller
     /**
      * 分页数据封装
      * @param $page
+     * @param  array|null  $list
      * @return array
      */
-    protected function paginate($page)
+    protected function paginate($page, array $list = null)
     {
         if ($page instanceof LengthAwarePaginator) {
             return [
@@ -115,7 +116,7 @@ class BaseController extends Controller
                 'page' => $page->currentPage(),
                 'limit' => $page->perPage(),
                 'pages' => $page->lastPage(),
-                'list' => $page->items()
+                'list' => $list ?? $page->items()
             ];
         }
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\Wx\AddressController;
 use App\Http\Controllers\Wx\AuthController;
 use App\Http\Controllers\Wx\BrandController;
 use App\Http\Controllers\Wx\CatalogController;
+use App\Http\Controllers\Wx\CouponController;
 use App\Http\Controllers\Wx\GoodsController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,3 +46,9 @@ Route::prefix('goods')->group(function () {
     Route::get('/count', [GoodsController::class, 'count']); // 统计商品总数
     Route::get('/category', [GoodsController::class, 'category']); // 当前分类
 });
+
+# 营销模块-优惠券
+Route::get('coupon/list', [CouponController::class, 'list']); // 优惠券列表
+Route::get('coupon/my-list', [CouponController::class, 'myList']); // 我的优惠券列表
+Route::post('coupon/receive', [CouponController::class, 'receive']); // 优惠券领取
+// Route::get('coupon/select-list'); // 当前订单可用优惠券列表
