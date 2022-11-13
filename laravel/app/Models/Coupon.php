@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Coupon extends BaseModel
 {
-    protected $table = 'coupon';
-
     protected $casts = [
         'discount' => 'float',
         'min' => 'float'

@@ -8,8 +8,6 @@ use App\enum\CollectTypeEnum;
 
 class Collect extends BaseModel
 {
-    protected $table = 'collect';
-
     /**
      * 统计商品收藏量
      * @param $userId

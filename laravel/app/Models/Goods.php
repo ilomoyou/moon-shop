@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Goods extends BaseModel
 {
-    protected $table = 'goods';
-
     protected $casts = [
         'counter_price' => 'float',
         'retail_price' => 'float',

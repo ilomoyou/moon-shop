@@ -9,8 +9,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class CouponUser extends BaseModel
 {
-    protected $table = 'coupon_user';
-
     protected $fillable = [
         'user_id',
         'coupon_id',

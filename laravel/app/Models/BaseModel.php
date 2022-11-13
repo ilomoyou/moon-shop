@@ -20,6 +20,16 @@ class BaseModel extends Model
     ];
 
     /**
+     * 重写父类改写模型与表名命名规则
+     * 模型驼峰命名 -- 表名蛇形命名
+     * @return string
+     */
+    public function getTable()
+    {
+        return $this->table ?? Str::snake(class_basename($this));
+    }
+
+    /**
      * 重写父类toArray 下划线转驼峰
      * @return array
      */

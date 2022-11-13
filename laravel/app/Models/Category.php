@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends BaseModel
 {
-    protected $table = 'category';
-
     /**
      * 获取一级类目列表
      * @return Category[]|Collection

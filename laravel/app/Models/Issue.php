@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class Issue extends BaseModel
 {
-    protected $table = 'issue';
-
     /**
      * 获取商品常见问题
      * @param  int  $page

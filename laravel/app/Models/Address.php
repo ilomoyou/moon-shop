@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class Address extends BaseModel
 {
-    protected $table = 'address';
-
     protected $casts = [
         'is_default' => 'boolean'
     ];

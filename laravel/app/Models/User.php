@@ -14,8 +14,6 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'user';
-
     public const CREATED_AT = 'add_time';
 
     public const UPDATED_AT = 'update_time';
