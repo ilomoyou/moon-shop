@@ -23,9 +23,14 @@ class BaseModel extends Model
 
     public const UPDATED_AT = 'update_time';
 
-    protected $casts = [
-        'deleted' => 'boolean'
-    ];
+    // 类型转换公用字段
+    public $defaultCasts = ['deleted' => 'boolean'];
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+        parent::mergeCasts($this->defaultCasts);
+    }
 
     /**
      * 重写父类改写模型与表名命名规则
