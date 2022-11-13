@@ -123,7 +123,7 @@ class Goods extends BaseModel
      */
     public function getGoodsAttribute()
     {
-        return $this->goodsAttribute()->where('deleted', 0)->get();
+        return $this->goodsAttribute()->get();
     }
 
     /**
@@ -132,7 +132,7 @@ class Goods extends BaseModel
      */
     public function getGoodsSpecification()
     {
-        $spec = $this->goodsSpecification()->where('deleted', 0)->get()->groupBy('specification');
+        $spec = $this->goodsSpecification()->get()->groupBy('specification');
         return $spec->map(function ($v, $k) {
             return ['name' => $k, 'valueList' => $v];
         })->values();
@@ -144,7 +144,7 @@ class Goods extends BaseModel
      */
     public function getGoodsProduct()
     {
-        return $this->goodsProduct()->where('deleted', 0)->get();
+        return $this->goodsProduct()->get();
     }
 
     /**
@@ -159,7 +159,6 @@ class Goods extends BaseModel
     {
         return $this->goodsComment()
             ->where('type', CommentTypeEnum::GOODS)
-            ->where('deleted', 0)
             ->orderBy($sort, $order)
             ->paginate($limit, ['*'], 'page', $page);
     }
@@ -171,7 +170,7 @@ class Goods extends BaseModel
      */
     public static function getGoodsById(int $id)
     {
-        return Goods::query()->where('deleted', 0)->find($id);
+        return Goods::query()->find($id);
     }
 
     /**
@@ -182,7 +181,6 @@ class Goods extends BaseModel
     {
         return Goods::query()
             ->where('is_on_sale', 1)
-            ->where('deleted', 0)
             ->count('id');
     }
 }

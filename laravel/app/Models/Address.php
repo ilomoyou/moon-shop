@@ -54,9 +54,7 @@ class Address extends BaseModel
      */
     public static function getAddressListByUserId(int $userId)
     {
-        return Address::query()
-            ->where('user_id', $userId)
-            ->where('deleted', 0)->get();
+        return Address::query()->where('user_id', $userId)->get();
     }
 
     /**
@@ -70,7 +68,7 @@ class Address extends BaseModel
         return Address::query()
             ->where('user_id', $userId)
             ->where('id', $addressId)
-            ->where('deleted', 0)->first();
+            ->first();
     }
 
     /**

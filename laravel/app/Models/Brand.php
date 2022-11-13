@@ -50,16 +50,16 @@ class Brand extends BaseModel
 
     /**
      * 获取品牌列表
-     * @param  int  $page 当前分页
-     * @param  int  $limit 每页条数
-     * @param  string  $sort 排序字段
-     * @param  string  $order 降序|升序
-     * @param  string[]  $columns 查询字段
+     * @param  int  $page  当前分页
+     * @param  int  $limit  每页条数
+     * @param  string  $sort  排序字段
+     * @param  string  $order  降序|升序
+     * @param  string[]  $columns  查询字段
      * @return LengthAwarePaginator
      */
     public static function getBrandList(int $page, int $limit, string $sort, string $order, array $columns = ['*'])
     {
-        $query = Brand::query()->where('deleted', 0);
+        $query = Brand::query();
         if (!empty($sort) && !empty($order)) {
             $query = $query->orderBy($sort, $order);
         }

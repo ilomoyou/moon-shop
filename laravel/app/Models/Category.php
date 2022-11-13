@@ -45,10 +45,7 @@ class Category extends BaseModel
      */
     public static function getL1List()
     {
-        return Category::query()
-            ->where('level', 'L1')
-            ->where('deleted', 0)
-            ->get();
+        return Category::query()->where('level', 'L1')->get();
     }
 
     /**
@@ -61,7 +58,6 @@ class Category extends BaseModel
         return Category::query()
             ->where('level', 'L2')
             ->where('pid', $pid)
-            ->where('deleted', 0)
             ->get();
     }
 
@@ -75,7 +71,6 @@ class Category extends BaseModel
         return Category::query()
             ->where('level', 'L1')
             ->where('id', $id)
-            ->where('deleted', 0)
             ->first();
     }
 
@@ -86,7 +81,7 @@ class Category extends BaseModel
      */
     public static function getCategoryById($id)
     {
-        return Category::query()->where('deleted', 0)->find($id);
+        return Category::query()->find($id);
     }
 
     /**
@@ -100,7 +95,6 @@ class Category extends BaseModel
             return Collection::empty();
         }
         return Category::query()
-            ->where('deleted', 0)
             ->where('level', 'L2')
             ->whereIn('id', $ids)->get();
     }

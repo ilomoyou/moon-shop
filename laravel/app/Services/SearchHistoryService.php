@@ -41,7 +41,7 @@ class SearchHistoryService extends BaseService
             ->where('user_id', $userId)
             ->where('from', SearchHistoryFromEnum::WX)
             ->where('keyword', $keyword)
-            ->where('deleted', 0)
+
             ->first();
     }
 }

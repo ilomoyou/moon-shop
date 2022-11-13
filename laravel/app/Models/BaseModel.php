@@ -4,6 +4,7 @@
 namespace App\Models;
 
 
+use App\util\BooleanSoftDeletes;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,9 @@ use Illuminate\Support\Str;
  */
 class BaseModel extends Model
 {
+    // 软删除
+    use BooleanSoftDeletes;
+
     public const CREATED_AT = 'add_time';
 
     public const UPDATED_AT = 'update_time';

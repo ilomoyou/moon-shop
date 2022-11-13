@@ -47,7 +47,7 @@ class GoodsService extends BaseService
      */
     private function getQueryByGoodsFilter(GoodsListInput $input)
     {
-        $query = Goods::query()->where('is_on_sale', 1)->where('deleted', 0);
+        $query = Goods::query()->where('is_on_sale', 1);
         if (!empty($input->brandId)) {
             $query->where('brand_id', $input->brandId);
         }

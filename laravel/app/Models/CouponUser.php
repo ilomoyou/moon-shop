@@ -53,9 +53,7 @@ class CouponUser extends BaseModel
      */
     public static function countCouponByCouponId($couponId)
     {
-        return CouponUser::query()
-            ->where('coupon_id', $couponId)
-            ->where('deleted', 0)->count('id');
+        return CouponUser::query()->where('coupon_id', $couponId)->count('id');
     }
 
     /**
@@ -69,7 +67,7 @@ class CouponUser extends BaseModel
         return CouponUser::query()
             ->where('user_id', $userId)
             ->where('coupon_id', $couponId)
-            ->where('deleted', 0)->count('id');
+            ->count('id');
     }
 
     /**
@@ -85,7 +83,6 @@ class CouponUser extends BaseModel
         return CouponUser::query()
             ->where('user_id', $userId)
             ->where('status', $status)
-            ->where('deleted', 0)
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page', $page->page);
     }

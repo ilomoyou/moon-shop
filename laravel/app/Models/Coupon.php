@@ -73,9 +73,7 @@ class Coupon extends BaseModel
      */
     public static function getCouponById($id, array $columns = ['*'])
     {
-        return Coupon::query()
-            ->where('id', $id)
-            ->where('deleted', 0)->find($id, $columns);
+        return Coupon::query()->where('id', $id)->find($id, $columns);
     }
 
     /**
@@ -89,7 +87,6 @@ class Coupon extends BaseModel
         return Coupon::query()
             ->where('type', CouponEnum::TYPE_COMMON)
             ->where('status', CouponEnum::STATUS_NORMAL)
-            ->where('deleted', 0)
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page', $page->page);
     }
@@ -102,8 +99,6 @@ class Coupon extends BaseModel
      */
     public static function getCouponListByIds(array $ids, array $columns = ['*'])
     {
-        return Coupon::query()
-            ->whereIn('id', $ids)
-            ->where('deleted', 0)->get($columns);
+        return Coupon::query()->whereIn('id', $ids)->get($columns);
     }
 }
