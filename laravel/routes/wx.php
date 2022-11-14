@@ -6,6 +6,7 @@ use App\Http\Controllers\Wx\BrandController;
 use App\Http\Controllers\Wx\CatalogController;
 use App\Http\Controllers\Wx\CouponController;
 use App\Http\Controllers\Wx\GoodsController;
+use App\Http\Controllers\Wx\GrouponController;
 use Illuminate\Support\Facades\Route;
 
 # 用户模块-鉴权
@@ -52,3 +53,5 @@ Route::get('coupon/list', [CouponController::class, 'list']); // 优惠券列表
 Route::get('coupon/my-list', [CouponController::class, 'myList']); // 我的优惠券列表
 Route::post('coupon/receive', [CouponController::class, 'receive']); // 优惠券领取
 // Route::get('coupon/select-list'); // 当前订单可用优惠券列表
+
+Route::get('groupon/list', [GrouponController::class, 'list']); // 团购列表

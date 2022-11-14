@@ -174,6 +174,19 @@ class Goods extends BaseModel
     }
 
     /**
+     * 根据多个ID获取商品列表
+     * @param  array  $ids
+     * @return Goods[]|Collection
+     */
+    public static function getGoodsListByIds(array $ids)
+    {
+        if (empty($ids)) {
+            return collect();
+        }
+        return Goods::query()->whereIn('id' ,$ids)->get();
+    }
+
+    /**
      * 获取在售商品总数
      * @return int
      */
