@@ -38,7 +38,7 @@ class CouponController extends BaseController
      */
     public function myList()
     {
-        $status = $this->verifyEnum('status', CouponEnum::STATUS_NORMAL, CouponEnum::getStatusValues());
+        $status = $this->verifyEnum('status', '', CouponEnum::getStatusValues());
         $page = PageInput::new();
 
         $couponUserList = CouponUser::getCouponUserListByUserId($this->userId(), $status, $page);

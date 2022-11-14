@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Inputs\PageInput;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * App\Models\CouponUser
@@ -21,20 +22,20 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
  * @property \Illuminate\Support\Carbon|null $add_time 创建时间
  * @property \Illuminate\Support\Carbon|null $update_time 更新时间
  * @property bool|null $deleted 逻辑删除
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser query()
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereAddTime($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereCouponId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereDeleted($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereEndTime($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereOrderId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereStartTime($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereUpdateTime($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereUsedTime($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CouponUser whereUserId($value)
+ * @method static Builder|CouponUser newModelQuery()
+ * @method static Builder|CouponUser newQuery()
+ * @method static Builder|CouponUser query()
+ * @method static Builder|CouponUser whereAddTime($value)
+ * @method static Builder|CouponUser whereCouponId($value)
+ * @method static Builder|CouponUser whereDeleted($value)
+ * @method static Builder|CouponUser whereEndTime($value)
+ * @method static Builder|CouponUser whereId($value)
+ * @method static Builder|CouponUser whereOrderId($value)
+ * @method static Builder|CouponUser whereStartTime($value)
+ * @method static Builder|CouponUser whereStatus($value)
+ * @method static Builder|CouponUser whereUpdateTime($value)
+ * @method static Builder|CouponUser whereUsedTime($value)
+ * @method static Builder|CouponUser whereUserId($value)
  * @mixin \Eloquent
  */
 class CouponUser extends BaseModel
@@ -82,7 +83,9 @@ class CouponUser extends BaseModel
     {
         return CouponUser::query()
             ->where('user_id', $userId)
-            ->where('status', $status)
+            ->when($status != '', function (Builder $query) use ($status) {
+                return $query->where('status', $status);
+            })
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page', $page->page);
     }
