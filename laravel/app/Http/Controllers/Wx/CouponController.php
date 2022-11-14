@@ -55,8 +55,8 @@ class CouponController extends BaseController
                 'tag' => $coupon->tag,
                 'min' => $coupon->min,
                 'discount' => $coupon->discount,
-                'start_time' => $couponUser->start_time,
-                'end_time' => $couponUser->end_timie,
+                'startTime' => $couponUser->start_time,
+                'endTime' => $couponUser->end_time,
                 'available' => false
             ];
         });

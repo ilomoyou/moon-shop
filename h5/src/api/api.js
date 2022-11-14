@@ -416,14 +416,16 @@ export function couponList(query) {
   return request({
     url: CouponList,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }
-export const CouponMyList='/coupon/mylist'; //我的优惠券列表
+export const CouponMyList='/coupon/my-list'; //我的优惠券列表
 export function couponMyList(query) {
   return request({
     url: CouponMyList,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }
@@ -440,6 +442,7 @@ export function couponReceive(data) {
   return request({
     url: CouponReceive,
     method: 'post',
+    version: 'v1',
     data
   })
 }
