@@ -7,6 +7,8 @@ namespace App\Models;
 use App\enum\GrouponEnum;
 use App\Inputs\PageInput;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Models\GroupRules
@@ -51,5 +53,16 @@ class GrouponRules extends BaseModel
         return GrouponRules::whereStatus(GrouponEnum::RULE_STATUS_ON)
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page', $page->page);
+    }
+
+    /**
+     * 根据ID获取团购规则详情
+     * @param $id
+     * @param  string[]  $columns
+     * @return GrouponRules|Collection|Model|null
+     */
+    public static function getGrouponRuleById($id, array $columns = ['*'])
+    {
+        return GrouponRules::query()->find($id, $columns);
     }
 }

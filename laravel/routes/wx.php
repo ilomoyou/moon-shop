@@ -7,6 +7,7 @@ use App\Http\Controllers\Wx\CatalogController;
 use App\Http\Controllers\Wx\CouponController;
 use App\Http\Controllers\Wx\GoodsController;
 use App\Http\Controllers\Wx\GrouponController;
+use App\Http\Controllers\Wx\HomeController;
 use Illuminate\Support\Facades\Route;
 
 # 用户模块-鉴权
@@ -54,4 +55,9 @@ Route::get('coupon/my-list', [CouponController::class, 'myList']); // 我的优�
 Route::post('coupon/receive', [CouponController::class, 'receive']); // 优惠券领取
 // Route::get('coupon/select-list'); // 当前订单可用优惠券列表
 
-Route::get('groupon/list', [GrouponController::class, 'list']); // 团购列表
+// 团购列表
+Route::get('groupon/list', [GrouponController::class, 'list']);
+
+// 分享链接跳转
+Route::get('/home/redirect-share-url', [HomeController::class, 'redirectShareUrl'])->name('home.redirectShareUrl');
+
