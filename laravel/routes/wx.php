@@ -3,6 +3,7 @@
 use App\Http\Controllers\Wx\AddressController;
 use App\Http\Controllers\Wx\AuthController;
 use App\Http\Controllers\Wx\BrandController;
+use App\Http\Controllers\Wx\CartController;
 use App\Http\Controllers\Wx\CatalogController;
 use App\Http\Controllers\Wx\CouponController;
 use App\Http\Controllers\Wx\GoodsController;
@@ -55,9 +56,20 @@ Route::get('coupon/my-list', [CouponController::class, 'myList']); // 我的优�
 Route::post('coupon/receive', [CouponController::class, 'receive']); // 优惠券领取
 // Route::get('coupon/select-list'); // 当前订单可用优惠券列表
 
+# 订单模块-购物车
+Route::prefix('cart')->group(function () {
+    Route::post('add', [CartController::class, 'add']); // 添加商品到购物车
+    Route::get('goods-count', [CartController::class, 'goodsCount']);// 获取购物车商品件数
+    Route::get('index'); // 获取购物车的数据
+    Route::get('fast-add'); // 立即购买商品
+    Route::get('update'); // 更新购物车的商品
+    Route::get('delete'); // 删除购物车的商品
+    Route::get('checked'); // 选中或未选中商品
+    Route::get('checkout'); // 下单前信息确认
+});
+
 // 团购列表
 Route::get('groupon/list', [GrouponController::class, 'list']);
 
 // 分享链接跳转
 Route::get('/home/redirect-share-url', [HomeController::class, 'redirectShareUrl'])->name('home.redirectShareUrl');
-

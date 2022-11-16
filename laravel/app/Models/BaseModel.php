@@ -7,6 +7,7 @@ namespace App\Models;
 use App\util\BooleanSoftDeletes;
 use Carbon\Carbon;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\JsonEncodingException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -69,6 +70,25 @@ class BaseModel extends Model
     public function serializeDate(DateTimeInterface $date)
     {
         return Carbon::instance($date)->toDateTimeString();
+    }
+
+    /**
+     * 重写方法 处理 casts array数据转换 中文乱码问题
+     * @param  string  $key
+     * @param  mixed  $value
+     * @return string
+     */
+    protected function castAttributeAsJson($key, $value)
+    {
+        $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+
+        if ($value === false) {
+            throw JsonEncodingException::forAttribute(
+                $this, $key, json_last_error_msg()
+            );
+        }
+
+        return $value;
     }
 
 }

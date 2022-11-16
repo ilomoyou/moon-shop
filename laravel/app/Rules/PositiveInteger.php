@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class MobilePhone implements Rule
+class PositiveInteger implements Rule
 {
     /**
      * Create a new rule instance.
@@ -25,7 +25,7 @@ class MobilePhone implements Rule
      */
     public function passes($attribute, $value)
     {
-        return preg_match("/^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166|198|199|(147))\d{8}$/", $value);
+        return is_numeric($value) && is_int($value + 0) && ($value + 0) > 0;
     }
 
     /**
@@ -35,6 +35,6 @@ class MobilePhone implements Rule
      */
     public function message()
     {
-        return ':attribute' .trans('verification.mobile_phone');
+        return ':attribute' . trans('verification.positive_integer');
     }
 }

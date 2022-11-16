@@ -7,6 +7,7 @@ namespace App\Models;
 use App\enum\CommentTypeEnum;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -68,9 +69,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder|Goods whereUnit($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Goods whereUpdateTime($value)
  * @mixin \Eloquent
+ * @method static \Database\Factories\GoodsFactory factory(...$parameters)
  */
 class Goods extends BaseModel
 {
+    use HasFactory;
+
     protected $casts = [
         'counter_price' => 'float',
         'retail_price' => 'float',

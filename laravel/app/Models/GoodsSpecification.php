@@ -4,6 +4,8 @@
 namespace App\Models;
 
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 /**
  * App\Models\GoodsSpecification
  *
@@ -27,7 +29,9 @@ namespace App\Models;
  * @method static \Illuminate\Database\Eloquent\Builder|GoodsSpecification whereUpdateTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GoodsSpecification whereValue($value)
  * @mixin \Eloquent
+ * @method static \Database\Factories\GoodsSpecificationFactory factory(...$parameters)
  */
 class GoodsSpecification extends BaseModel
 {
+    use HasFactory;
 }

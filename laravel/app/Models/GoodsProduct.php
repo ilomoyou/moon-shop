@@ -4,6 +4,10 @@
 namespace App\Models;
 
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * App\Models\GoodsProduct
  *
@@ -29,11 +33,23 @@ namespace App\Models;
  * @method static \Illuminate\Database\Eloquent\Builder|GoodsProduct whereUpdateTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GoodsProduct whereUrl($value)
  * @mixin \Eloquent
+ * @method static \Database\Factories\GoodsProductFactory factory(...$parameters)
  */
 class GoodsProduct extends BaseModel
 {
+    use HasFactory;
+
     protected $casts = [
         'specifications' => 'array',
         'price' => 'float'
     ];
+
+    /**
+     * @param  int  $id
+     * @return GoodsProduct|Collection|Model|null
+     */
+    public static function getGoodsProductById(int $id)
+    {
+        return self::query()->find($id);
+    }
 }
