@@ -4,12 +4,16 @@
 namespace App\Services;
 
 
+use App\Exceptions\BusinessException;
+use App\Exceptions\NotFoundException;
 use App\Inputs\GoodsListInput;
 use App\Models\Category;
 use App\Models\Goods;
+use App\util\ResponseCode;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class GoodsService extends BaseService
 {
@@ -38,6 +42,34 @@ class GoodsService extends BaseService
         $query = $this->getQueryByGoodsFilter($input);
         $categoryIds = $query->select(['category_id'])->pluck('category_id')->unique()->toArray();
         return Category::getL2ListByIds($categoryIds);
+    }
+
+    /**
+     * 根据商品ID获取商品信息
+     * @param $goodsId
+     * @return Goods|Collection|Model
+     * @throws NotFoundException
+     */
+    public function getGoodsById($goodsId)
+    {
+        $goods = Goods::getGoodsById($goodsId);
+        if (is_null($goods)) {
+            throw new NotFoundException('goods is not found');
+        }
+        return $goods;
+    }
+
+    /**
+     * 校验商品是否下架
+     * @param  Goods  $goods
+     * @return void
+     * @throws BusinessException
+     */
+    public function checkGoodsIsOnSale(Goods $goods) : void
+    {
+        if (!$goods->is_on_sale) {
+            throw new BusinessException(ResponseCode::GOODS_UNSHELVE);
+        }
     }
 
     /**

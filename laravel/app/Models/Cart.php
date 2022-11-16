@@ -49,6 +49,11 @@ class Cart extends BaseModel
         'specifications' => 'array'
     ];
 
+    public static function getCartById($userId, $id)
+    {
+        return self::query()->where('user_id', $userId)->where('id', $id)->first();
+    }
+
     /**
      * 获取购物车货品
      * @param $userId

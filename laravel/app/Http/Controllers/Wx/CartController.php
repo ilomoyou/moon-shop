@@ -8,10 +8,9 @@ use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\ParametersException;
 use App\Models\Cart;
-use App\Models\Goods;
-use App\Models\GoodsProduct;
 use App\Services\CartService;
-use App\util\ResponseCode;
+use App\Services\GoodsProductService;
+use App\Services\GoodsService;
 use Illuminate\Http\JsonResponse;
 
 class CartController extends BaseController
@@ -29,19 +28,10 @@ class CartController extends BaseController
         $productId = $this->verifyId('productId');
         $number = $this->verifyPositiveInteger('number');
 
-        $goods = Goods::getGoodsById($goodsId);
-        if (is_null($goods)) {
-            throw new NotFoundException('goods is not found');
-        }
-        if (!$goods->is_on_sale) {
-            throw new BusinessException(ResponseCode::GOODS_UNSHELVE);
-        }
+        $goods = GoodsService::getInstance()->getGoodsById($goodsId);
+        GoodsService::getInstance()->checkGoodsIsOnSale($goods);
 
-        $product = GoodsProduct::getGoodsProductById($productId);
-        if (is_null($product)) {
-            throw new NotFoundException('goods_product is not found');
-        }
-
+        $product = GoodsProductService::getInstance()->getGoodsProductById($productId);
         $cartProduct = Cart::getCartProduct($this->userId(), $goodsId, $productId);
         if (is_null($cartProduct)) {
             // add new cart product
@@ -49,9 +39,7 @@ class CartController extends BaseController
         } else {
             // edit cart product number
             $num = $cartProduct->number + $number;
-            if ($num > $product->number) {
-                throw new BusinessException(ResponseCode::GOODS_NO_STOCK);
-            }
+            GoodsProductService::getInstance()->checkGoodsProductStock($product, $num);
             $cartProduct->number = $num;
             $cartProduct->save();
         }
@@ -68,5 +56,33 @@ class CartController extends BaseController
     {
         $count = Cart::countCartProduct($this->userId());
         return $this->success($count);
+    }
+
+    /**
+     * 更新购物车的商品数量
+     * @return JsonResponse
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     */
+    public function update()
+    {
+        $id = $this->verifyId('id');
+        $goodsId = $this->verifyId('goodsId');
+        $productId = $this->verifyId('productId');
+        $number = $this->verifyPositiveInteger('number');
+
+        $cart = CartService::getInstance()->getCartById($this->userId(), $id);
+        CartService::getInstance()->checkCartParameter($cart, $goodsId, $productId);
+
+        $goods = GoodsService::getInstance()->getGoodsById($goodsId);
+        GoodsService::getInstance()->checkGoodsIsOnSale($goods);
+
+        $product = GoodsProductService::getInstance()->getGoodsProductById($productId);
+        GoodsProductService::getInstance()->checkGoodsProductStock($product, $number);
+
+        $cart->number = $number;
+        $ret = $cart->save();
+        return $this->failOrSuccess($ret);
     }
 }

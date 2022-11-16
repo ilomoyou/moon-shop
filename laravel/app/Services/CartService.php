@@ -5,10 +5,13 @@ namespace App\Services;
 
 
 use App\Exceptions\BusinessException;
+use App\Exceptions\NotFoundException;
+use App\Exceptions\ParametersException;
 use App\Models\Cart;
 use App\Models\Goods;
 use App\Models\GoodsProduct;
 use App\util\ResponseCode;
+use Illuminate\Database\Eloquent\Model;
 
 class CartService extends BaseService
 {
@@ -40,5 +43,35 @@ class CartService extends BaseService
         $cart->product_id = $product->id;
         $cart->save();
         return $cart;
+    }
+
+    /**
+     * 获取用户购物车信息
+     * @param $userId
+     * @param $cartId
+     * @return Cart|Model|object
+     * @throws NotFoundException
+     */
+    public function getCartById($userId, $cartId)
+    {
+        $cart = Cart::getCartById($userId, $cartId);
+        if (is_null($cart)) {
+            throw new NotFoundException('cart is not found');
+        }
+        return $cart;
+    }
+
+    /**
+     * 校验购物车参数
+     * @param  Cart  $cart
+     * @param $goodsId
+     * @param $productId
+     * @throws ParametersException
+     */
+    public function checkCartParameter(Cart $cart, $goodsId, $productId) : void
+    {
+        if ($cart->goods_id != $goodsId || $cart->product_id != $productId) {
+            throw new ParametersException('购物车参数校验异常');
+        }
     }
 }

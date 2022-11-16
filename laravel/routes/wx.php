@@ -59,10 +59,10 @@ Route::post('coupon/receive', [CouponController::class, 'receive']); // 优惠�
 # 订单模块-购物车
 Route::prefix('cart')->group(function () {
     Route::post('add', [CartController::class, 'add']); // 添加商品到购物车
+    Route::post('update', [CartController::class, 'update']); // 更新购物车的商品数量
     Route::get('goods-count', [CartController::class, 'goodsCount']);// 获取购物车商品件数
     Route::get('index'); // 获取购物车的数据
     Route::get('fast-add'); // 立即购买商品
-    Route::get('update'); // 更新购物车的商品
     Route::get('delete'); // 删除购物车的商品
     Route::get('checked'); // 选中或未选中商品
     Route::get('checkout'); // 下单前信息确认
