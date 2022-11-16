@@ -403,6 +403,7 @@ export function grouponList(query) {
   return request({
     url: GrouponList,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }
