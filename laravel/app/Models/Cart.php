@@ -4,6 +4,7 @@
 namespace App\Models;
 
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -49,6 +50,34 @@ class Cart extends BaseModel
         'specifications' => 'array'
     ];
 
+    /**
+     * 获取购物车列表信息
+     * @param $userId
+     * @return Cart[]|Collection
+     */
+    public static function getCartList($userId)
+    {
+        return self::query()->where('user_id', $userId)->get();
+    }
+
+    /**
+     * 批量删除购物车货品项
+     * @param $ids
+     * @return int|mixed
+     */
+    public static function deleteCartList($ids)
+    {
+        if (empty($ids)) {
+            return 0;
+        }
+        return self::query()->whereIn('id', $ids)->delete();
+    }
+
+    /**
+     * @param $userId
+     * @param $id
+     * @return Cart|Model|object|null
+     */
     public static function getCartById($userId, $id)
     {
         return self::query()->where('user_id', $userId)->where('id', $id)->first();
@@ -77,6 +106,20 @@ class Cart extends BaseModel
      */
     public static function countCartProduct($userId)
     {
-        return Cart::query()->where('user_id', $userId)->sum('number');
+        return self::query()->where('user_id', $userId)->sum('number');
+    }
+
+    /**
+     * 批量删除购物车货品
+     * @param $userId
+     * @param $productIds
+     * @return bool|int|mixed|null
+     */
+    public static function removeByProductIds($userId, $productIds)
+    {
+        return self::query()
+            ->where('user_id', $userId)
+            ->whereIn('product_id', $productIds)
+            ->delete();
     }
 }

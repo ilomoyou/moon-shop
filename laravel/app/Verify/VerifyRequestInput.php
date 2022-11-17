@@ -8,6 +8,7 @@ use App\enum\GenderEnum;
 use App\Exceptions\ParametersException;
 use App\Rules\MobilePhone;
 use App\Rules\PositiveInteger;
+use App\Rules\PositiveIntegerArray;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -47,6 +48,18 @@ trait VerifyRequestInput
     public function verifyPositiveInteger($key, $default = null)
     {
         return $this->verifyData($key, $default, new PositiveInteger());
+    }
+
+    /**
+     * 验证正整数数组
+     * @param $key
+     * @param  null  $default
+     * @return mixed
+     * @throws ParametersException
+     */
+    public function verifyPositiveIntegerArray($key, $default = null)
+    {
+        return $this->verifyData($key, $default, new PositiveIntegerArray());
     }
 
     /**
