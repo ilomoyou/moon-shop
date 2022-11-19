@@ -44,6 +44,23 @@ class AddressService extends BaseService
     }
 
     /**
+     * 获取用户默认的地址或用户选择的地址
+     * @param $userId
+     * @param  null  $addressId
+     * @return Address|Model|object
+     * @throws NotFoundException
+     */
+    public function getUserAddress($userId, $addressId = null)
+    {
+        if (empty($addressId)) {
+            $address = $this->getDefaultAddress($userId);
+        } else {
+            $address = $this->getAddressById($userId, $addressId);
+        }
+        return $address;
+    }
+
+    /**
      * 根据ID获取地址信息
      * @param $userId
      * @param $addressId

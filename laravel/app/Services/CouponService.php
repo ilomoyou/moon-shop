@@ -10,6 +10,8 @@ use App\Models\Coupon;
 use App\Models\CouponUser;
 use App\util\ResponseCode;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class CouponService extends BaseService
 {
@@ -49,13 +51,68 @@ class CouponService extends BaseService
     }
 
     /**
+     * 根据当前价格选择最合适的一张优惠券
+     * @param $userId
+     * @param $couponId
+     * @param $price
+     * @param  int  $availableCouponLength  返回可用的优惠券长度
+     * @return CouponUser|Collection|Model|mixed|null
+     */
+    public function getMostMeetPriceCoupon($userId, $couponId, $price, int &$availableCouponLength = 0)
+    {
+        // 可用优惠券列表
+        $couponUserList = $this->getMeetPriceCouponListAndSort($userId, $price);
+        $availableCouponLength = $couponUserList->count();
+
+        // 不使用优惠券
+        if ($couponId == -1 || is_null($couponId)) {
+            return null;
+        }
+
+        // 用户选择优惠券，验证是否可用
+        if (!empty($couponId)) {
+            $coupon = Coupon::getCouponById($couponId);
+            $couponUser = CouponUser::getCouponUserByCouponId($userId, $couponId);
+            $usable = $this->checkCouponDiscountsValidity($coupon, $couponUser, $price);
+            if ($usable) {
+                return $couponUser;
+            }
+        }
+
+        // 自动选择优惠券
+        return $couponUserList->first();
+    }
+
+    /**
+     * 获取适合当前价格的优惠券列表, 并根据优惠折扣进行降序排序
+     * @param $userId
+     * @param $price
+     * @return CouponUser[]|Collection
+     */
+    private function getMeetPriceCouponListAndSort($userId, $price)
+    {
+        $couponUserList = CouponUser::getUsableCouponList($userId);
+        $couponIds = $couponUserList->pluck('coupon_id')->unique()->toArray();
+        $couponList = Coupon::getCouponListByIds($couponIds)->keyBy('id');
+        return $couponUserList->filter(function (CouponUser $couponUser) use ($couponList, $price) {
+            /** @var Coupon $coupon */
+            $coupon = $couponList->get($couponUser->coupon_id);
+            return $this->checkCouponDiscountsValidity($coupon, $couponUser, $price);
+        })->sortByDesc(function (CouponUser $couponUser) use ($couponList) {
+            /** @var Coupon $coupon */
+            $coupon = $couponList->get($couponUser->coupon_id);
+            return $coupon->discount;
+        });
+    }
+
+    /**
      * 验证当前价格是否可以使用该优惠券
      * @param  Coupon  $coupon
      * @param  CouponUser  $couponUser
      * @param  double  $price
      * @return bool
      */
-    public function checkCouponDiscountsValidity(Coupon $coupon, CouponUser $couponUser, float $price)
+    private function checkCouponDiscountsValidity(Coupon $coupon, CouponUser $couponUser, float $price)
     {
         if (empty($coupon)) {
             return false;
@@ -74,7 +131,7 @@ class CouponService extends BaseService
         }
 
         // 判断是否满足优惠最低消费金额
-        if (bccomp($coupon->min, $price) == 1) {
+        if (bccomp($coupon->min, $price, 2) == 1) {
             return false;
         }
 

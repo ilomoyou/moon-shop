@@ -3,7 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Goods;
+use App\Models\GoodsProduct;
 use App\Models\GoodsSpecification;
+use App\Models\GrouponRules;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class GoodsProductFactory extends Factory
@@ -28,5 +30,23 @@ class GoodsProductFactory extends Factory
             "number" => 100,
             "url" => $this->faker->imageUrl(),
         ];
+    }
+
+    /**
+     * 配置模型工厂
+     *
+     * @return GoodsProductFactory
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (GoodsProduct $product) {
+            $goods = Goods::getGoodsById($product->goods_id);
+            GrouponRules::factory()->create([
+                'goods_id' => $product->goods_id,
+                'goods_name' => $goods->name,
+                'pic_url' => $goods->pic_url,
+                'discount' => 1
+            ]);
+        });
     }
 }

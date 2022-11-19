@@ -75,6 +75,20 @@ class CouponUser extends BaseModel
     }
 
     /**
+     * 根据优惠券ID获取用户优惠券信息
+     * @param $userId
+     * @param $couponId
+     * @return CouponUser|Model|object|null
+     */
+    public static function getCouponUserByCouponId($userId, $couponId)
+    {
+        return CouponUser::query()
+            ->where('user_id', $userId)
+            ->where('coupon_id', $couponId)
+            ->orderBy('id')->first();
+    }
+
+    /**
      * 获取用户优惠券
      * @param $id
      * @param  string[]  $columns

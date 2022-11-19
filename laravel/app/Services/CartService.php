@@ -10,6 +10,7 @@ use App\Exceptions\ParametersException;
 use App\Models\Cart;
 use App\Models\Goods;
 use App\Models\GoodsProduct;
+use App\Models\GrouponRules;
 use App\util\ResponseCode;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -24,7 +25,7 @@ class CartService extends BaseService
      * @param $goodsId
      * @param $productId
      * @param $number
-     * @param  bool  $buyNowFlag 立即购买标识
+     * @param  bool  $buyNowFlag  立即购买标识
      * @return Cart|Model|object
      * @throws BusinessException
      * @throws NotFoundException
@@ -109,12 +110,12 @@ class CartService extends BaseService
         $invalidCartIds = [];
         $validCartList = $cartList->filter(function (Cart $cart) use ($goodsList, &$invalidCartIds) {
             /** @var Goods $goods */
-           $goods = $goodsList->get($cart->goods_id);
-           $isValid = !empty($goods) && $goods->is_on_sale;
-           if (!$isValid) {
-               $invalidCartIds[] = $cart->id;
-           }
-           return $isValid;
+            $goods = $goodsList->get($cart->goods_id);
+            $isValid = !empty($goods) && $goods->is_on_sale;
+            if (!$isValid) {
+                $invalidCartIds[] = $cart->id;
+            }
+            return $isValid;
         });
         // 删除下架|无效购物车货品项
         Cart::deleteCartList($invalidCartIds);
@@ -135,6 +136,49 @@ class CartService extends BaseService
             throw new NotFoundException('cart is not found');
         }
         return $cart;
+    }
+
+    /**
+     * 获取被选中的或指定的购物车商品列表
+     * @param $userId
+     * @param $cartId
+     * @return Cart[]|Collection|\Illuminate\Support\Collection
+     * @throws NotFoundException
+     */
+    public function getCartListByCheckedOrId($userId, $cartId = null)
+    {
+        if (empty($cartId)) {
+            $cartList = $this->getCheckedCartList($userId);
+        } else {
+            $cart = $this->getCartById($userId, $cartId);
+            $cartList = collect([$cart]);
+        }
+        return $cartList;
+    }
+
+    /**
+     * 计算减去购团折扣优惠价后的金额
+     * @param  $cartList
+     * @param  $grouponRulesId
+     * @param  float  $discountTotalPrice  返回团购优惠合计
+     * @return int|string
+     */
+    public function countGoodsTotalPriceSubtractDiscount($cartList, $grouponRulesId, float &$discountTotalPrice = 0)
+    {
+        $goodsTotalPrice = 0;
+        $grouponRules = empty($grouponRulesId) ? null : GrouponRules::getGrouponRuleById($grouponRulesId);
+        foreach ($cartList as $cart) {
+            if ($grouponRules && $grouponRules->goods_id == $cart->goods_id) {
+                $price = bcsub($cart->price, $grouponRules->discount, 2);
+                $discounts = bcmul($grouponRules->discount, $cart->number, 2);
+                $discountTotalPrice = bcadd($discountTotalPrice, $discounts);
+            } else {
+                $price = $cart->price;
+            }
+            $amount = bcmul($price, $cart->number, 2);
+            $goodsTotalPrice = bcadd($goodsTotalPrice, $amount, 2);
+        }
+        return $goodsTotalPrice;
     }
 
     /**
@@ -159,7 +203,7 @@ class CartService extends BaseService
      * @param $productId
      * @throws ParametersException
      */
-    public function checkCartParameter(Cart $cart, $goodsId, $productId) : void
+    public function checkCartParameter(Cart $cart, $goodsId, $productId): void
     {
         if ($cart->goods_id != $goodsId || $cart->product_id != $productId) {
             throw new ParametersException('购物车参数校验异常');

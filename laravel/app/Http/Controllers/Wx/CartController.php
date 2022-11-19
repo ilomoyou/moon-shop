@@ -9,8 +9,6 @@ use App\Exceptions\NotFoundException;
 use App\Exceptions\ParametersException;
 use App\Models\Cart;
 use App\Models\Coupon;
-use App\Models\CouponUser;
-use App\Models\GrouponRules;
 use App\Services\AddressService;
 use App\Services\CartService;
 use App\Services\CouponService;
@@ -162,104 +160,55 @@ class CartController extends BaseController
         $cartId = $this->verifyInteger('cartId', 0);
         $addressId = $this->verifyInteger('addressId', 0);
         $couponId = $this->verifyInteger('couponId', 0);
-        $userCouponId = $this->verifyInteger('userCouponId', 0);
         $grouponRulesId = $this->verifyInteger('grouponRulesId', 0);
 
         // 获取地址
-        if (empty($addressId)) {
-            $address = AddressService::getInstance()->getDefaultAddress($this->userId());
-            $addressId = $address->id ?? 0;
-        } else {
-            $address = AddressService::getInstance()->getAddressById($this->userId(), $addressId);
-        }
+        $address = AddressService::getInstance()->getUserAddress($this->userId(), $addressId);
+        $addressId = $address->id ?? 0;
 
         // 获取购物车的商品列表
-        if (empty($cartId)) {
-            $cartList = CartService::getInstance()->getCheckedCartList($this->userId());
-        } else {
-            $cart = CartService::getInstance()->getCartById($this->userId(), $cartId);
-            $cartList = collect([$cart]);
-        }
+        $cartList = CartService::getInstance()->getCartListByCheckedOrId($this->userId(), $cartId);
 
-        // 价格计算
-        $totalAmount = 0; // 订单总金额
-        $grouponAmount = 0; // 团购优惠金额
+        // 团购优惠价格合计
+        $discountTotalPrice = 0;
+        // 减去团购优惠后商品总价合计
+        $goodsTotalPrice = CartService::getInstance()->countGoodsTotalPriceSubtractDiscount($cartList, $grouponRulesId, $discountTotalPrice);
 
-        // 团购优惠
-        $grouponRules = GrouponRules::getGrouponRuleById($grouponRulesId);
-        foreach ($cartList as $cart) {
-            if ($grouponRules && $grouponRules->goods_id == $cart->goods_id) {
-                $price = bcsub($cart->price, $grouponRules->discount, 2);
-                $discounts = bcmul($grouponRules->discount, $cart->number, 2);
-                $grouponAmount = bcadd($grouponAmount, $discounts);
-            } else {
-                $price = $cart->price;
-            }
-            $amount = bcmul($price, $cart->number, 2);
-            $totalAmount = bcadd($totalAmount, $amount, 2);
-        }
-
-        // 获取适合当前价格的优惠券列表, 并根据优惠折扣进行降序排序
-        $couponUserList = CouponUser::getUsableCouponList($this->userId());
-        $couponIds = $couponUserList->pluck('coupon_id')->unique()->toArray();
-        $couponList = Coupon::getCouponListByIds($couponIds)->keyBy('id');
-        $couponUserList->filter(function (CouponUser $couponUser) use ($couponList, $totalAmount) {
-            /** @var Coupon $coupon */
-            $coupon = $couponList->get($couponUser->coupon_id);
-            return CouponService::getInstance()->checkCouponDiscountsValidity($coupon, $couponUser, $totalAmount);
-        })->sortByDesc(function (CouponUser $couponUser) use ($couponList) {
-            /** @var Coupon $coupon */
-            $coupon = $couponList->get($couponUser->coupon_id);
-            return $coupon->discount;
-        });
-
-        /**
-         * 选择优惠券
-         * couponId = -1|null 不使用优惠券
-         * couponId = 0 自动选择优惠券
-         * 其他 用户选择优惠券，验证是否可用
-         */
-        $couponDiscountAmount = 0; // 优惠券优惠金额
-        if ($couponId == -1 || is_null($couponId)) {
+        // 选择优惠券
+        $availableCouponLength = 0;
+        $couponUser = CouponService::getInstance()->getMostMeetPriceCoupon($this->userId(), $couponId, $goodsTotalPrice, $availableCouponLength);
+        if (is_null($couponUser)) {
             $couponId = -1;
             $userCouponId = -1;
-        } elseif ($couponId == 0) {
-            /** @var CouponUser $couponUser */
-            $couponUser = $couponUserList->first();
+            $couponPrice = 0;
+        } else {
             $couponId = $couponUser->coupon_id ?? 0;
             $userCouponId = $couponUser->id ?? 0;
-            $couponDiscountAmount = Coupon::getCouponById($couponId)->discount ?? 0;
-        } else {
-            $coupon = Coupon::getCouponById($couponId);
-            $couponUser = CouponUser::getCouponUserById($userCouponId);
-            $usable = CouponService::getInstance()->checkCouponDiscountsValidity($coupon, $couponUser, $totalAmount);
-            if ($usable) {
-                $couponDiscountAmount = $coupon->discount ?? 0;
-            }
+            $couponPrice = Coupon::getCouponById($couponId)->discount ?? 0;
         }
 
         // 运费
-        $freightAmount = 0;
+        $freightPrice = 0;
         $freightMin = SystemService::getInstance()->getFreightMin();
-        if (bccomp($freightMin, $totalAmount)) {
-            $freightAmount = SystemService::getInstance()->getFreightValue();
+        if (bccomp($freightMin, $goodsTotalPrice, 2) == 1) {
+            $freightPrice = SystemService::getInstance()->getFreightValue();
         }
 
         // 计算订单最终金额
-        $orderFinalAmount = bcadd($totalAmount, $freightAmount, 2); // 加运费
-        $orderFinalAmount = bcsub($orderFinalAmount, $couponDiscountAmount, 2); // 减优惠券优惠金额
+        $orderFinalAmount = bcadd($goodsTotalPrice, $freightPrice, 2); // 加运费
+        $orderFinalAmount = bcsub($orderFinalAmount, $couponPrice, 2); // 减优惠券优惠金额
 
         return $this->success([
             'cartId' => $cartId,
             'addressId' => $addressId,
             'grouponRulesId' => $grouponRulesId,
-            'grouponPrice' => $grouponAmount,
-            'goodsTotalPrice' => $totalAmount,
-            'freightPrice' => $freightAmount,
+            'grouponPrice' => $discountTotalPrice,
+            'goodsTotalPrice' => $goodsTotalPrice,
+            'freightPrice' => $freightPrice,
             'couponId' => $couponId,
             'userCouponId' => $userCouponId,
-            'availableCouponLength' => $couponUserList->count(),
-            'couponPrice' => $couponDiscountAmount,
+            'availableCouponLength' => $availableCouponLength,
+            'couponPrice' => $couponPrice,
             'orderTotalPrice' => $orderFinalAmount,
             'actualPrice' => $orderFinalAmount,
             'checkedAddress' => $address,
