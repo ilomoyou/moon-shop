@@ -4,9 +4,12 @@
 namespace App\Models;
 
 
+use App\enum\CouponUserEnum;
 use App\Inputs\PageInput;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Models\CouponUser
@@ -69,6 +72,30 @@ class CouponUser extends BaseModel
             ->where('user_id', $userId)
             ->where('coupon_id', $couponId)
             ->count('id');
+    }
+
+    /**
+     * 获取用户优惠券
+     * @param $id
+     * @param  string[]  $columns
+     * @return CouponUser|Collection|Model|null
+     */
+    public static function getCouponUserById($id, array $columns = ['*'])
+    {
+        return CouponUser::query()->find($id, $columns);
+    }
+
+    /**
+     * 获取可用的优惠券列表
+     * @param $userId
+     * @return CouponUser[]|Builder[]|Collection
+     */
+    public static function getUsableCouponList($userId)
+    {
+        return CouponUser::query()
+            ->where('user_id', $userId)
+            ->where('status', CouponUserEnum::STATUS_USABLE)
+            ->get();
     }
 
     /**

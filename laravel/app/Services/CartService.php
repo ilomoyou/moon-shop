@@ -138,6 +138,21 @@ class CartService extends BaseService
     }
 
     /**
+     * 获取被选中的购物车商品列表
+     * @param $userId
+     * @return Cart[]|Collection
+     * @throws NotFoundException
+     */
+    public function getCheckedCartList($userId)
+    {
+        $cart = Cart::getCheckedCartList($userId);
+        if (is_null($cart)) {
+            throw new NotFoundException('cart list is null');
+        }
+        return $cart;
+    }
+
+    /**
      * 校验购物车参数
      * @param  Cart  $cart
      * @param $goodsId

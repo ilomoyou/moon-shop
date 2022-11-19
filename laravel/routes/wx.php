@@ -65,7 +65,7 @@ Route::prefix('cart')->group(function () {
     Route::post('update', [CartController::class, 'update']); // 更新购物车的商品数量
     Route::post('checked', [CartController::class, 'checked']); // 选中或未选中商品
     Route::get('goods-count', [CartController::class, 'goodsCount']);// 获取购物车商品件数
-    Route::get('checkout'); // 下单前信息确认
+    Route::get('checkout', [CartController::class, 'checkout']); // 下单前信息确认
 });
 
 // 团购列表

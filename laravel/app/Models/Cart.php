@@ -61,6 +61,19 @@ class Cart extends BaseModel
     }
 
     /**
+     * 获取已选中的购物车列表
+     * @param $userId
+     * @return Cart[]|Collection
+     */
+    public static function getCheckedCartList($userId)
+    {
+        return self::query()
+            ->where('user_id', $userId)
+            ->where('checked', 1)
+            ->get();
+    }
+
+    /**
      * 批量删除购物车货品项
      * @param $ids
      * @return int|mixed

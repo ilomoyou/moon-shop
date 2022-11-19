@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Exceptions\NotFoundException;
 use App\Models\Address;
+use Illuminate\Database\Eloquent\Model;
 
 class AddressService extends BaseService
 {
@@ -39,6 +40,37 @@ class AddressService extends BaseService
         $address->address_detail = $data['addressDetail'];
         $address->is_default = $data['isDefault'];
         $address->save();
+        return $address;
+    }
+
+    /**
+     * 根据ID获取地址信息
+     * @param $userId
+     * @param $addressId
+     * @return Address
+     * @throws NotFoundException
+     */
+    public function getAddressById($userId, $addressId)
+    {
+        $address = Address::getAddress($userId, $addressId);
+        if (is_null($address)) {
+            throw new NotFoundException('address is not found');
+        }
+        return $address;
+    }
+
+    /**
+     * 获取用户默认地址
+     * @param $userId
+     * @return Address|Model|object
+     * @throws NotFoundException
+     */
+    public function getDefaultAddress($userId)
+    {
+        $address = Address::getDefaultAddress($userId);
+        if (is_null($address)) {
+            throw new NotFoundException('address is not found');
+        }
         return $address;
     }
 }

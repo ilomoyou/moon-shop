@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Exceptions\NotFoundException;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Models\Address
@@ -46,6 +47,19 @@ class Address extends BaseModel
     protected $casts = [
         'is_default' => 'boolean'
     ];
+
+    /**
+     * 获取用户默认地址
+     * @param $userId
+     * @return Address|Model|object|null
+     */
+    public static function getDefaultAddress($userId)
+    {
+        return Address::query()
+            ->where('user_id', $userId)
+            ->where('is_default', 1)
+            ->first();
+    }
 
     /**
      * 通过用户id获取用户地址列表

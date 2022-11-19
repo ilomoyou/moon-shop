@@ -49,6 +49,59 @@ class CouponService extends BaseService
     }
 
     /**
+     * 验证当前价格是否可以使用该优惠券
+     * @param  Coupon  $coupon
+     * @param  CouponUser  $couponUser
+     * @param  double  $price
+     * @return bool
+     */
+    public function checkCouponDiscountsValidity(Coupon $coupon, CouponUser $couponUser, float $price)
+    {
+        if (empty($coupon)) {
+            return false;
+        }
+        if (empty($couponUser)) {
+            return false;
+        }
+        if ($coupon->id != $couponUser->coupon_id) {
+            return false;
+        }
+        if ($coupon->status != CouponEnum::STATUS_NORMAL) {
+            return false;
+        }
+        if ($coupon->type != CouponEnum::GOODS_TYPE_ALL) {
+            return false;
+        }
+
+        // 判断是否满足优惠最低消费金额
+        if (bccomp($coupon->min, $price) == 1) {
+            return false;
+        }
+
+        // 判断优惠券是否在有效时间限制内
+        $now = now();
+        switch ($coupon->time_type) {
+            case CouponEnum::TIME_TYPE_TIME:
+                $start = Carbon::parse($coupon->start_time);
+                $end = Carbon::parse($coupon->end_time);
+                if ($now->isBefore($start) || $now->isAfter($end)) {
+                    return false;
+                }
+                break;
+            case CouponEnum::TIME_TYPE_DAYS:
+                $expired = Carbon::parse($couponUser->add_time)->addDays($coupon->days);
+                if ($now->isAfter($expired)) {
+                    return false;
+                }
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
      * 领取优惠券
      * @param  Coupon  $coupon
      * @param $userId
