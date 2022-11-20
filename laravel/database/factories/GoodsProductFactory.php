@@ -33,13 +33,14 @@ class GoodsProductFactory extends Factory
     }
 
     /**
-     * 配置模型工厂
-     *
+     * 团购场景
      * @return GoodsProductFactory
      */
-    public function configure()
+    public function groupon()
     {
-        return $this->afterCreating(function (GoodsProduct $product) {
+        return $this->state(function () {
+            return [];
+        })->afterCreating(function (GoodsProduct $product) {
             $goods = Goods::getGoodsById($product->goods_id);
             GrouponRules::factory()->create([
                 'goods_id' => $product->goods_id,

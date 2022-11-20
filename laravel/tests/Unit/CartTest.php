@@ -45,7 +45,7 @@ class CartTest extends TestCase
         /** @var GoodsProduct $product1 */
         $product1 = GoodsProduct::factory()->create(['price' => 11.3]);
         /** @var GoodsProduct $product2 */
-        $product2 = GoodsProduct::factory()->create(['price' => 20.56]);
+        $product2 = GoodsProduct::factory()->groupon()->create(['price' => 20.56]);
         /** @var GoodsProduct $product3 */
         $product3 = GoodsProduct::factory()->create(['price' => 10.6]);
         CartService::getInstance()->addCartOrBuyNow($this->user->id, $product1->goods_id, $product1->id, 2);
