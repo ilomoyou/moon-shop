@@ -112,7 +112,7 @@ class CouponService extends BaseService
      * @param  double  $price
      * @return bool
      */
-    private function checkCouponDiscountsValidity(Coupon $coupon, CouponUser $couponUser, float $price)
+    public function checkCouponDiscountsValidity(Coupon $coupon, CouponUser $couponUser, float $price)
     {
         if (empty($coupon)) {
             return false;

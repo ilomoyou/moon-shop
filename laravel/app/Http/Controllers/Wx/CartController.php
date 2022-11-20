@@ -14,7 +14,7 @@ use App\Services\CartService;
 use App\Services\CouponService;
 use App\Services\GoodsProductService;
 use App\Services\GoodsService;
-use App\Services\SystemService;
+use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 
 class CartController extends BaseController
@@ -188,11 +188,7 @@ class CartController extends BaseController
         }
 
         // 运费
-        $freightPrice = 0;
-        $freightMin = SystemService::getInstance()->getFreightMin();
-        if (bccomp($freightMin, $goodsTotalPrice, 2) == 1) {
-            $freightPrice = SystemService::getInstance()->getFreightValue();
-        }
+        $freightPrice = OrderService::getInstance()->getFreight($goodsTotalPrice);
 
         // 计算订单最终金额
         $orderFinalAmount = bcadd($goodsTotalPrice, $freightPrice, 2); // 加运费

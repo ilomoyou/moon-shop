@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Address;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
@@ -21,6 +23,22 @@ class UserFactory extends Factory
             'mobile' => $this->faker->phoneNumber,
             'avatar' => $this->faker->imageUrl()
         ];
+    }
+
+    /**
+     * 用户默认地址场景
+     * @return UserFactory
+     */
+    public function defaultAddress()
+    {
+        return $this->state(function () {
+            return [];
+        })->afterCreating(function (User $user) {
+            Address::factory()->create([
+                'user_id' => $user->id,
+                'is_default' => 1
+            ]);
+        });
     }
 
     /**

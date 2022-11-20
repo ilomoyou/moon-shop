@@ -98,6 +98,20 @@ class CartService extends BaseService
     }
 
     /**
+     * 清除购物车商品记录
+     * @param $userId
+     * @param  null  $cartId
+     * @return bool|mixed|null
+     */
+    public function clearCartGoods($userId, $cartId = null)
+    {
+        if (empty($cartId)) {
+            return Cart::query()->where('user_id', $userId)->where('checked', 1)->delete();
+        }
+        return Cart::query()->where('user_id', $userId)->where('id', $cartId)->delete();
+    }
+
+    /**
      * 获取有效的购物车列表信息
      * @param $userId
      * @return Cart[]|Collection

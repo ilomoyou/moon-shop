@@ -9,6 +9,7 @@ use App\Http\Controllers\Wx\CouponController;
 use App\Http\Controllers\Wx\GoodsController;
 use App\Http\Controllers\Wx\GrouponController;
 use App\Http\Controllers\Wx\HomeController;
+use App\Http\Controllers\Wx\OrderController;
 use Illuminate\Support\Facades\Route;
 
 # 用户模块-鉴权
@@ -66,6 +67,10 @@ Route::prefix('cart')->group(function () {
     Route::post('checked', [CartController::class, 'checked']); // 选中或未选中商品
     Route::get('goods-count', [CartController::class, 'goodsCount']);// 获取购物车商品件数
     Route::get('checkout', [CartController::class, 'checkout']); // 下单前信息确认
+});
+
+Route::prefix('order')->group(function () {
+    Route::post('submit', [OrderController::class, 'submit']);
 });
 
 // 团购列表

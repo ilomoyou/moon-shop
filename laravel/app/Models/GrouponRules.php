@@ -40,6 +40,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|GrouponRules wherePicUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GrouponRules whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GrouponRules whereUpdateTime($value)
+ * @method static \Database\Factories\GrouponRulesFactory factory(...$parameters)
  */
 class GrouponRules extends BaseModel
 {
