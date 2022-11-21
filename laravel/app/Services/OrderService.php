@@ -62,9 +62,7 @@ class OrderService extends BaseService
         $freightPrice = $this->getFreight($checkedGoodsPrice);
 
         // 计算订单金额
-        $orderTotalPrice = bcadd($checkedGoodsPrice, $freightPrice, 2); // 加运费
-        $orderTotalPrice = bcsub($orderTotalPrice, $couponPrice, 2); // 减优惠券优惠金额
-        $orderTotalPrice = max(0, $orderTotalPrice);
+        $orderTotalPrice = $this->countOrderTotalPrice($checkedGoodsPrice, $freightPrice, $couponPrice);
 
         // 订单保存
         $order = new Order();
@@ -164,5 +162,20 @@ class OrderService extends BaseService
             $freightPrice = SystemService::getInstance()->getFreightValue();
         }
         return $freightPrice;
+    }
+
+    /**
+     * 计算订单金额
+     * @param $goodsPrice
+     * @param $freightPrice
+     * @param $discountPrice
+     * @return mixed
+     */
+    public function countOrderTotalPrice($goodsPrice, $freightPrice, $discountPrice)
+    {
+        // 计算订单金额
+        $orderTotalPrice = bcadd($goodsPrice, $freightPrice, 2); // 加运费
+        $orderTotalPrice = bcsub($orderTotalPrice, $discountPrice, 2); // 减优惠券优惠金额
+        return max(0, $orderTotalPrice);
     }
 }

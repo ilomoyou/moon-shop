@@ -12,9 +12,6 @@ class CartTest extends TestCase
 {
     use DatabaseTransactions;
 
-    /** @var User $user */
-    private $user;
-
     /** @var GoodsProduct $product */
     private $product;
 

@@ -191,8 +191,7 @@ class CartController extends BaseController
         $freightPrice = OrderService::getInstance()->getFreight($goodsTotalPrice);
 
         // 计算订单最终金额
-        $orderFinalAmount = bcadd($goodsTotalPrice, $freightPrice, 2); // 加运费
-        $orderFinalAmount = bcsub($orderFinalAmount, $couponPrice, 2); // 减优惠券优惠金额
+        $orderTotalPrice = OrderService::getInstance()->countOrderTotalPrice($goodsTotalPrice, $freightPrice, $couponPrice);
 
         return $this->success([
             'cartId' => $cartId,
@@ -205,8 +204,8 @@ class CartController extends BaseController
             'userCouponId' => $userCouponId,
             'availableCouponLength' => $availableCouponLength,
             'couponPrice' => $couponPrice,
-            'orderTotalPrice' => $orderFinalAmount,
-            'actualPrice' => $orderFinalAmount,
+            'orderTotalPrice' => $orderTotalPrice,
+            'actualPrice' => $orderTotalPrice,
             'checkedAddress' => $address,
             'checkedGoodsList' => $cartList
         ]);
