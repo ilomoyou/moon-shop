@@ -1,6 +1,8 @@
 <?php
 
 
+use App\Exceptions\BusinessException;
+use App\Exceptions\NotFoundException;
 use App\Inputs\OrderSubmitInput;
 use App\Models\Cart;
 use App\Models\GoodsProduct;
@@ -16,6 +18,31 @@ use Tests\TestCase;
 class OrderTest extends TestCase
 {
     use DatabaseTransactions;
+
+    /**
+     * 减库存
+     * @throws BusinessException
+     * @throws NotFoundException
+     */
+    public function testReduceStock()
+    {
+        /** @var GoodsProduct $product1 */
+        $product1 = GoodsProduct::factory()->create(['price' => 11.3]);
+        /** @var GoodsProduct $product2 */
+        $product2 = GoodsProduct::factory()->groupon()->create(['price' => 20.56]);
+        /** @var GoodsProduct $product3 */
+        $product3 = GoodsProduct::factory()->create(['price' => 10.6]);
+        CartService::getInstance()->addCartOrBuyNow($this->user->id, $product1->goods_id, $product1->id, 2);
+        CartService::getInstance()->addCartOrBuyNow($this->user->id, $product2->goods_id, $product2->id, 5);
+        CartService::getInstance()->addCartOrBuyNow($this->user->id, $product3->goods_id, $product3->id, 3);
+        CartService::getInstance()->updateChecked($this->user->id, [$product1->id], false);
+
+        $checkedGoodsList = CartService::getInstance()->getCartListByCheckedOrId($this->user->id);
+        OrderService::getInstance()->reduceProductsStock($checkedGoodsList);
+
+        $this->assertEquals($product2->number - 5, $product2->refresh()->number);
+        $this->assertEquals($product3->number - 3, $product3->refresh()->number);
+    }
 
     public function testSubmit()
     {

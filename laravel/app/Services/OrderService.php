@@ -11,9 +11,11 @@ use App\Inputs\OrderSubmitInput;
 use App\Models\Cart;
 use App\Models\Coupon;
 use App\Models\CouponUser;
+use App\Models\GoodsProduct;
 use App\Models\Order;
 use App\Models\OrderGoods;
 use App\util\ResponseCode;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -91,7 +93,8 @@ class OrderService extends BaseService
         // TODO 减库存
 
         // 添加团购记录
-        GrouponService::getInstance()->openOrJoinGroupon($userId, $order->id, $input->grouponRulesId, $input->grouponLinkId);
+        GrouponService::getInstance()->openOrJoinGroupon($userId, $order->id, $input->grouponRulesId,
+            $input->grouponLinkId);
 
         // TODO 设置超时任务
 
@@ -100,7 +103,7 @@ class OrderService extends BaseService
 
     /**
      * 保存订单商品记录
-     * @param  Cart[]  $checkedGoodsList
+     * @param  Cart[]|Collection  $checkedGoodsList
      * @param $orderId
      */
     private function saveOrderGoods($checkedGoodsList, $orderId)
@@ -117,6 +120,22 @@ class OrderService extends BaseService
             $orderGoods->number = $cart->number;
             $orderGoods->specifications = $cart->specifications;
             $orderGoods->save();
+        }
+    }
+
+    /**
+     * 减库存
+     * @param  Cart[]|Collection  $goodsList
+     * @throws BusinessException
+     */
+    public function reduceProductsStock($goodsList)
+    {
+        $productIds = $goodsList->pluck('product_id')->toArray();
+        $productList = GoodsProduct::getGoodsProductListByIds($productIds)->keyBy('id');
+        foreach ($goodsList as $cart) {
+            $product = $productList->get($cart->product_id);
+            GoodsProductService::getInstance()->checkGoodsProductStock($product, $cart->number);
+            GoodsProductService::getInstance()->reduceStock($product->id, $cart->number);
         }
     }
 

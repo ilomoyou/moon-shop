@@ -40,4 +40,25 @@ class GoodsProductService extends BaseService
             throw new BusinessException(ResponseCode::GOODS_NO_STOCK);
         }
     }
+
+    /**
+     * 减库存
+     * 处理并发: CAS乐观锁,先比较后更新
+     *
+     * @param $productId
+     * @param $number
+     * @return false|int
+     * @throws BusinessException
+     */
+    public function reduceStock($productId, $number)
+    {
+        $row = GoodsProduct::query()
+            ->where('id', $productId)
+            ->where('number', '>=', $number)
+            ->decrement('number', $number);
+        if ($row <= 0) {
+            throw new BusinessException(ResponseCode::GOODS_NO_STOCK);
+        }
+        return $row;
+    }
 }

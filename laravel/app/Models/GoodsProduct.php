@@ -52,4 +52,16 @@ class GoodsProduct extends BaseModel
     {
         return self::query()->find($id);
     }
+
+    /**
+     * @param  array  $ids
+     * @return GoodsProduct[]|Collection
+     */
+    public static function getGoodsProductListByIds(array $ids)
+    {
+        if (empty($ids)) {
+            return collect();
+        }
+        return self::query()->whereIn('id', $ids)->get();
+    }
 }
