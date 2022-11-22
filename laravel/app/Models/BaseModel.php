@@ -40,19 +40,70 @@ class BaseModel extends Model
     /**
      * 乐观锁更新 先比较后更新(CAS: compare and save)
      * @return bool|int
+     * @throws \Throwable
      */
     public function cas()
     {
-        $dirty = $this->getDirty();
-        $updateAt = $this->getUpdatedAtColumn();
-        $query = self::query()->where($this->getKeyName(), $this->getKey())
-            ->where($updateAt, $this->{$updateAt});
+        // 判断需要更新的数据是否存在
+        throw_if(!$this->exists, \Exception::class, 'model not exists when cas!');
 
+        $dirty = $this->getDirty(); // 返回模型所有被修改过的字段
+        if (empty($dirty)) {
+            return 0;
+        }
+
+        // 如果需要更新update_time,则代入更新字段到查询构造器中去
+        if ($this->usesTimestamps()) {
+            $this->updateTimestamps();
+            $dirty = $this->getDirty();
+        }
+
+        // 需要更新的字段必须在查询中存在
+        $diff = array_diff(array_keys($dirty), array_keys($this->original));
+        throw_if(!empty($diff), \Exception::class, sprintf("key %s not exists when cas!", implode(',', $diff)));
+
+        // 注册模型事件casing
+        if ($this->fireModelEvent('casing') === false) {
+            return 0;
+        }
+
+        // 数据比较
+        $query = $this->newModelQuery()->where($this->getKeyName(), $this->getKey());
         foreach ($dirty as $key => $value) {
             $query = $query->where($key, $this->getOriginal($key));
         }
 
-        return $query->update($dirty);
+        // 数据更新
+        $row =  $query->update($dirty);
+        if ($row > 0) {
+            $this->syncChanges();
+            $this->fireModelEvent('cased', false); // // 注册模型事件cased
+            $this->syncOriginal();
+        }
+
+        return $row;
+    }
+
+    /**
+     * Register a saving model event with the dispatcher.
+     *
+     * @param  \Illuminate\Events\QueuedClosure|\Closure|string  $callback
+     * @return void
+     */
+    public static function casing($callback)
+    {
+        static::registerModelEvent('casing', $callback);
+    }
+
+    /**
+     * Register a saved model event with the dispatcher.
+     *
+     * @param  \Illuminate\Events\QueuedClosure|\Closure|string  $callback
+     * @return void
+     */
+    public static function cased($callback)
+    {
+        static::registerModelEvent('cased', $callback);
     }
 
     /**

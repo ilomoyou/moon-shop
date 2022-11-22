@@ -144,4 +144,23 @@ class OrderTest extends TestCase
         $products = GoodsProduct::getGoodsProductListByIds($productIds);
         $this->assertEquals([100, 100], $products->pluck('number')->toArray());
     }
+
+    /**
+     * CAS 单测
+     * @throws Throwable
+     */
+    public function testCas()
+    {
+        $user = $this->user->refresh();
+        $user->nickname = 'test1';
+        $user->mobile = '15000000000';
+        $is = $user->cas();
+        $this->assertEquals(1, $is);
+        $this->assertEquals('test1', User::find($this->user->id)->nickname);
+        User::query()->where('id', $this->user->id)->update(['nickname' => 'test2']);
+        $is = $user->cas();
+        $this->assertEquals(0, $is);
+        $this->assertEquals('test2', User::find($this->user->id)->nickname);
+        $user->save();
+    }
 }

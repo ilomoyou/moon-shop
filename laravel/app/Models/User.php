@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -57,15 +60,12 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUsername($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereWeixinOpenid($value)
  */
-class User extends Authenticatable implements JWTSubject
+class User extends BaseModel implements
+    AuthenticatableContract,
+    AuthorizableContract,
+    JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
-    protected $table = 'user';
-
-    public const CREATED_AT = 'add_time';
-
-    public const UPDATED_AT = 'update_time';
+    use Authenticatable, Authorizable, HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
