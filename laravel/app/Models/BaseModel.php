@@ -77,7 +77,7 @@ class BaseModel extends Model
         $row =  $query->update($dirty);
         if ($row > 0) {
             $this->syncChanges();
-            $this->fireModelEvent('cased', false); // // 注册模型事件cased
+            $this->fireModelEvent('cased', false); // 注册模型事件cased
             $this->syncOriginal();
         }
 
