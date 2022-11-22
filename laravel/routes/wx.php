@@ -70,7 +70,8 @@ Route::prefix('cart')->group(function () {
 });
 
 Route::prefix('order')->group(function () {
-    Route::post('submit', [OrderController::class, 'submit']);
+    Route::post('submit', [OrderController::class, 'submit']); // 提交订单
+    Route::post('cancel', [OrderController::class, 'cancel']); // 取消订单
 });
 
 // 团购列表

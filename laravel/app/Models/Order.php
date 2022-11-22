@@ -4,6 +4,10 @@
 namespace App\Models;
 
 
+use App\util\OrderStatusTrait;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * App\Models\Order
  *
@@ -76,5 +80,15 @@ namespace App\Models;
  */
 class Order extends BaseModel
 {
+    use OrderStatusTrait;
 
+    /**
+     * @param $userId
+     * @param $id
+     * @return Order|Collection|Model|null
+     */
+    public static function getOrderByUserIdAndId($userId, $id)
+    {
+        return self::query()->where('user_id', $userId)->find($id);
+    }
 }

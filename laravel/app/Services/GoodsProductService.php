@@ -61,4 +61,22 @@ class GoodsProductService extends BaseService
         }
         return $row;
     }
+
+    /**
+     * 还原库存
+     * @param $productId
+     * @param $number
+     * @return false|int
+     * @throws BusinessException
+     */
+    public function restoreStock($productId, $number)
+    {
+        $product = GoodsProduct::getGoodsProductById($productId);
+        $product->number = $product->number + $number;
+        $row = $product->cas();
+        if ($row <= 0) {
+            throw new BusinessException(ResponseCode::UPDATED_FAIL, '还原库存失败');
+        }
+        return $row;
+    }
 }

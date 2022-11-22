@@ -12,6 +12,18 @@ class SystemService extends BaseService
     const EXPRESS_FREIGHT_MIN = 'litemall_express_freight_min';
     const EXPRESS_FREIGHT_VALUE = 'litemall_express_freight_value';
 
+    // 订单相关配置
+    const ORDER_UNPAID = 'litemall_order_unpaid';
+
+    /**
+     * 获取未支付订单超时时间
+     * @return int
+     */
+    public function getOrderUnpaidDelayMinutes()
+    {
+        return (int) $this->get(self::ORDER_UNPAID);
+    }
+
     /**
      * 获取免运费最小金额
      * @return float

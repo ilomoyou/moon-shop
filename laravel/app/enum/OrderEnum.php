@@ -20,4 +20,11 @@ class OrderEnum
     const STATUS_SHIP = 301;
     const STATUS_CONFIRM = 401;
     const STATUS_AUTO_CONFIRM = 402;
+
+    /**
+     * 订单被取消处理的角色
+     */
+    const CANCELLED_ROLE_USER = 'user';
+    const CANCELLED_ROLE_ADMIN = 'admin';
+    const CANCELLED_ROLE_SYSTEM = 'system';
 }

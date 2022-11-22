@@ -39,4 +39,16 @@ class OrderController extends BaseController
             'grouponLinkId' => $input->grouponLinkId ?? 0
         ]);
     }
+
+    /**
+     * 用户主动取消订单
+     * @throws ParametersException
+     * @throws \Throwable
+     */
+    public function cancel()
+    {
+        $orderId = $this->verifyId('orderId');
+        OrderService::getInstance()->userCancelOrder($this->userId(), $orderId);
+        $this->success();
+    }
 }

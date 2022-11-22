@@ -8,6 +8,7 @@ use App\enum\OrderEnum;
 use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
 use App\Inputs\OrderSubmitInput;
+use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Cart;
 use App\Models\Coupon;
 use App\Models\CouponUser;
@@ -16,6 +17,7 @@ use App\Models\Order;
 use App\Models\OrderGoods;
 use App\util\ResponseCode;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -90,13 +92,15 @@ class OrderService extends BaseService
         // 清除购物车商品记录
         CartService::getInstance()->clearCartGoods($userId, $input->cartId);
 
-        // TODO 减库存
+        // 减库存
+        $this->reduceProductsStock($checkedGoodsList);
 
         // 添加团购记录
         GrouponService::getInstance()->openOrJoinGroupon($userId, $order->id, $input->grouponRulesId,
             $input->grouponLinkId);
 
-        // TODO 设置超时任务
+        // 设置超时任务
+        dispatch(new OrderUnpaidTimeEndJob($userId, $order->id));
 
         return $order;
     }
@@ -137,6 +141,99 @@ class OrderService extends BaseService
             GoodsProductService::getInstance()->checkGoodsProductStock($product, $cart->number);
             GoodsProductService::getInstance()->reduceStock($product->id, $cart->number);
         }
+    }
+
+
+    /**
+     * 还原库存
+     * @param OrderGoods[]|Collection $orderGoodsList
+     * @throws BusinessException
+     */
+    public function restoreProductsStock($orderGoodsList)
+    {
+        foreach ($orderGoodsList as $orderGoods) {
+            GoodsProductService::getInstance()->restoreStock($orderGoods->product_id, $orderGoods->number);
+        }
+    }
+
+    /**
+     * 用户取消订单
+     * @param $userId
+     * @param $orderId
+     * @throws \Throwable
+     */
+    public function userCancelOrder($userId, $orderId)
+    {
+        DB::transaction(function () use ($userId, $orderId) {
+           $this->cancelOrder($userId, $orderId);
+        });
+    }
+
+    /**
+     * 管理员取消订单
+     * @param $userId
+     * @param $orderId
+     * @throws \Throwable
+     */
+    public function adminCancelOrder($userId, $orderId)
+    {
+        DB::transaction(function () use ($userId, $orderId) {
+            $this->cancelOrder($userId, $orderId, OrderEnum::CANCELLED_ROLE_ADMIN);
+        });
+    }
+
+    /**
+     * 系统自动取消订单
+     * @param $userId
+     * @param $orderId
+     * @throws \Throwable
+     */
+    public function systemCancelOrder($userId, $orderId)
+    {
+        DB::transaction(function () use ($userId, $orderId) {
+            $this->cancelOrder($userId, $orderId, OrderEnum::CANCELLED_ROLE_SYSTEM);
+        });
+    }
+
+    /**
+     * 取消订单
+     * @param $userId
+     * @param $orderId
+     * @param  string  $role
+     * @return void
+     * @throws BusinessException
+     * @throws NotFoundException
+     */
+    private function cancelOrder($userId, $orderId, string $role = OrderEnum::CANCELLED_ROLE_USER): void
+    {
+        $order = Order::getOrderByUserIdAndId($userId, $orderId);
+        if (is_null($order)) {
+            throw new NotFoundException('order is not found');
+        }
+
+        if (!$order->canCancelHandle()) {
+            throw new BusinessException(ResponseCode::ORDER_INVALID_OPERATION, '订单取消无效');
+        }
+
+        switch ($order) {
+            case OrderEnum::CANCELLED_ROLE_SYSTEM:
+                $order->order_status = OrderEnum::STATUS_AUTO_CANCEL;
+                break;
+            case OrderEnum::CANCELLED_ROLE_ADMIN:
+                $order->order_status = OrderEnum::STATUS_ADMIN_CANCEL;
+                break;
+            default:
+                $order->order_status = OrderEnum::STATUS_CANCEL;
+        }
+
+        // 更新订单状态
+        if (!$order->cas()) {
+            throw new BusinessException(ResponseCode::UPDATED_FAIL);
+        }
+
+        // 还原库存
+        $orderGoodsList = OrderGoods::getOrderGoodsListByOrderId($order->id);
+        $this->restoreProductsStock($orderGoodsList);
     }
 
     /**

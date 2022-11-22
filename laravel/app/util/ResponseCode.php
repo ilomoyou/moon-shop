@@ -25,6 +25,8 @@ class ResponseCode
     const GOODS_UNSHELVE = [710, '商品已下架'];
     const GOODS_NO_STOCK = [711, '库存不足'];
 
+    const ORDER_INVALID_OPERATION = [725, '订单操作无效'];
+
     const GROUPON_EXPIRED = [730, '团购已经过期'];
     const GROUPON_OFFLINE = [731, '团购已经下线'];
     const GROUPON_FULL = [732, '团购活动人数已满'];

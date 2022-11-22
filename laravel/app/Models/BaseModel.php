@@ -38,6 +38,24 @@ class BaseModel extends Model
     }
 
     /**
+     * 乐观锁更新 先比较后更新(CAS: compare and save)
+     * @return bool|int
+     */
+    public function cas()
+    {
+        $dirty = $this->getDirty();
+        $updateAt = $this->getUpdatedAtColumn();
+        $query = self::query()->where($this->getKeyName(), $this->getKey())
+            ->where($updateAt, $this->{$updateAt});
+
+        foreach ($dirty as $key => $value) {
+            $query = $query->where($key, $this->getOriginal($key));
+        }
+
+        return $query->update($dirty);
+    }
+
+    /**
      * 重写父类改写模型与表名命名规则
      * 模型驼峰命名 -- 表名蛇形命名
      * @return string

@@ -1,12 +1,15 @@
 <?php
 
 
+use App\enum\OrderEnum;
 use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
+use App\Exceptions\ParametersException;
 use App\Inputs\OrderSubmitInput;
 use App\Models\Cart;
 use App\Models\GoodsProduct;
 use App\Models\GrouponRules;
+use App\Models\Order;
 use App\Models\OrderGoods;
 use App\Models\User;
 use App\Services\AddressService;
@@ -88,5 +91,57 @@ class OrderTest extends TestCase
 
         $productIds = Cart::getCartList($this->user->id)->pluck('product_id')->toArray();
         $this->assertEquals([$product1->id], $productIds);
+    }
+
+    /**
+     * 创建订单
+     * @return Order
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     */
+    private function createOrder()
+    {
+        $this->user = User::factory()->defaultAddress()->create();
+        $address = AddressService::getInstance()->getUserAddress($this->user->id);
+
+        /** @var GoodsProduct $product1 */
+        $product1 = GoodsProduct::factory()->create(['price' => 11.3]);
+        /** @var GoodsProduct $product2 */
+        $product2 = GoodsProduct::factory()->groupon()->create(['price' => 20.56]);
+        /** @var GoodsProduct $product3 */
+        $product3 = GoodsProduct::factory()->create(['price' => 10.6]);
+        CartService::getInstance()->addCartOrBuyNow($this->user->id, $product1->goods_id, $product1->id, 2);
+        CartService::getInstance()->addCartOrBuyNow($this->user->id, $product2->goods_id, $product2->id, 5);
+        CartService::getInstance()->addCartOrBuyNow($this->user->id, $product3->goods_id, $product3->id, 3);
+        CartService::getInstance()->updateChecked($this->user->id, [$product1->id], false);
+
+        $grouponRulesId = GrouponRules::whereGoodsId($product2->goods_id)->first()->id ?? null;
+        $input = OrderSubmitInput::new([
+            'cartId' => 0,
+            'couponId' => 0,
+            'addressId' => $address->id,
+            'grouponRulesId' => $grouponRulesId,
+            'message' => '备注'
+        ]);
+        return OrderService::getInstance()->submitOrder($this->user->id, $input);
+    }
+
+    /**
+     * 取消订单单元测试
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     * @throws Throwable
+     */
+    public function testCancel()
+    {
+        $order = $this->createOrder();
+        OrderService::getInstance()->userCancelOrder($this->user->id, $order->id);
+        $this->assertEquals(OrderEnum::STATUS_CANCEL, $order->refresh()->order_status);
+        $goodsList = OrderGoods::getOrderGoodsListByOrderId($order->id);
+        $productIds = $goodsList->pluck('product_id')->toArray();
+        $products = GoodsProduct::getGoodsProductListByIds($productIds);
+        $this->assertEquals([100, 100], $products->pluck('number')->toArray());
     }
 }

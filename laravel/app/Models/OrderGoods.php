@@ -4,6 +4,8 @@
 namespace App\Models;
 
 
+use Illuminate\Database\Eloquent\Collection;
+
 /**
  * App\Models\OrderGoods
  *
@@ -45,4 +47,14 @@ class OrderGoods extends BaseModel
     protected $casts = [
         'specifications' => 'array'
     ];
+
+    /**
+     * 获取订单相关商品列表
+     * @param $orderId
+     * @return OrderGoods[]|Collection
+     */
+    public static function getOrderGoodsListByOrderId($orderId)
+    {
+        return self::query()->where('order_id', $orderId)->get();
+    }
 }
