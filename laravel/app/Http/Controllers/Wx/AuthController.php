@@ -178,9 +178,10 @@ class AuthController extends BaseController
 
         // todo 新用户发券
 
-        // 返回用户信息 todo 返回token
+        // 返回用户信息 返回token
+        $token = Auth::login($user);
         return $this->success([
-            'token' => '',
+            'token' => $token,
             'userInfo' => [
                 'nickname' => $username,
                 'avatar' => $user->avatar
