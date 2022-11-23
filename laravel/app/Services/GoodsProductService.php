@@ -67,7 +67,8 @@ class GoodsProductService extends BaseService
      * @param $productId
      * @param $number
      * @return false|int
-     * @throws BusinessException|\Throwable
+     * @throws BusinessException
+     * @throws \Throwable
      */
     public function restoreStock($productId, $number)
     {

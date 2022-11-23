@@ -146,8 +146,9 @@ class OrderService extends BaseService
 
     /**
      * 还原库存
-     * @param OrderGoods[]|Collection $orderGoodsList
+     * @param  OrderGoods[]|Collection  $orderGoodsList
      * @throws BusinessException
+     * @throws \Throwable
      */
     public function restoreProductsStock($orderGoodsList)
     {
@@ -203,6 +204,7 @@ class OrderService extends BaseService
      * @return void
      * @throws BusinessException
      * @throws NotFoundException
+     * @throws \Throwable
      */
     private function cancelOrder($userId, $orderId, string $role = OrderEnum::CANCELLED_ROLE_USER): void
     {
