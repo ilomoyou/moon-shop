@@ -77,7 +77,7 @@ class GrouponService extends BaseService
         $groupon->order_id = $orderId;
         $groupon->user_id = $userId;
         $groupon->status = GrouponEnum::STATUS_NONE;
-        $groupon->rules_id = $userId;
+        $groupon->rules_id = $ruleId;
 
         // 开启团购
         if ($linkId == null || $linkId <= 0) {
@@ -101,13 +101,12 @@ class GrouponService extends BaseService
      * 支付成功，更新团购活动状态
      * @param $orderId
      * @throws BusinessException
-     * @throws NotFoundException
      */
     public function payGrouponOrder($orderId)
     {
         $groupon = Groupon::getGrouponByOrderId($orderId);
         if (is_null($groupon)) {
-            throw new NotFoundException('groupon is not fount');
+            return;
         }
 
         $rule = GrouponRules::getGrouponRuleById($groupon->rules_id);
