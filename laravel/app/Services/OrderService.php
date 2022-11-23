@@ -172,7 +172,7 @@ class OrderService extends BaseService
     public function userCancelOrder($userId, $orderId)
     {
         DB::transaction(function () use ($userId, $orderId) {
-           $this->cancelOrder($userId, $orderId);
+            $this->cancelOrder($userId, $orderId);
         });
     }
 
@@ -248,8 +248,8 @@ class OrderService extends BaseService
      * 订单支付成功
      * @param  Order  $order
      * @param $payId
+     * @return Order
      * @throws BusinessException
-     * @throws NotFoundException
      * @throws \Throwable
      */
     public function payOrder(Order $order, $payId)
@@ -269,11 +269,19 @@ class OrderService extends BaseService
         GrouponService::getInstance()->payGrouponOrder($order->id);
 
         // 发送邮件通知
-        Notification::route('mail', env('NOTIFY_EMAIL_USERNAME'))->notify(new NewPaidOrderEmailNotify($order->id));
+        Notification::route(
+            'mail',
+            env('NOTIFY_EMAIL_USERNAME')
+        )->notify(new NewPaidOrderEmailNotify($order->id));
 
         // 发送短信通知
         $user = User::getUserById($order->user_id);
-        Notification::route(EasySmsChannel::class, new PhoneNumber($user->mobile, 86))->notify(new NewPaidOrderSmsNotify($user->username));
+        Notification::route(
+            EasySmsChannel::class,
+            new PhoneNumber($user->mobile, 86)
+        )->notify(new NewPaidOrderSmsNotify($user->username));
+
+        return $order;
     }
 
     /**
