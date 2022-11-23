@@ -25,6 +25,7 @@ class ResponseCode
     const GOODS_UNSHELVE = [710, '商品已下架'];
     const GOODS_NO_STOCK = [711, '库存不足'];
 
+    const ORDER_PAY_FAIL = [724, '订单支付失败'];
     const ORDER_INVALID_OPERATION = [725, '订单操作无效'];
 
     const GROUPON_EXPIRED = [730, '团购已经过期'];

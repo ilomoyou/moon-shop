@@ -16,4 +16,13 @@ trait OrderStatusTrait
     {
         return $this->order_status == OrderEnum::STATUS_CREATE;
     }
+
+    /**
+     * 是否可以支付
+     * @return bool
+     */
+    public function canPayHandle()
+    {
+        return $this->order_status == OrderEnum::STATUS_CREATE;
+    }
 }

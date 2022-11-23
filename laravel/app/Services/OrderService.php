@@ -15,11 +15,17 @@ use App\Models\CouponUser;
 use App\Models\GoodsProduct;
 use App\Models\Order;
 use App\Models\OrderGoods;
+use App\Models\User;
+use App\Notifications\NewPaidOrderEmailNotify;
+use App\Notifications\NewPaidOrderSmsNotify;
 use App\util\ResponseCode;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
+use Overtrue\EasySms\PhoneNumber;
 
 class OrderService extends BaseService
 {
@@ -236,6 +242,38 @@ class OrderService extends BaseService
         // 还原库存
         $orderGoodsList = OrderGoods::getOrderGoodsListByOrderId($order->id);
         $this->restoreProductsStock($orderGoodsList);
+    }
+
+    /**
+     * 订单支付成功
+     * @param  Order  $order
+     * @param $payId
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws \Throwable
+     */
+    public function payOrder(Order $order, $payId)
+    {
+        if (!$order->canPayHandle()) {
+            throw new BusinessException(ResponseCode::ORDER_PAY_FAIL, '订单支付无效');
+        }
+
+        $order->pay_id = $payId;
+        $order->pay_time = now()->toDateTimeString();
+        $order->order_status = OrderEnum::STATUS_PAY;
+        if (!$order->cas()) {
+            throw new BusinessException(ResponseCode::UPDATED_FAIL);
+        }
+
+        // 支付成功,更新团购信息
+        GrouponService::getInstance()->payGrouponOrder($order->id);
+
+        // 发送邮件通知
+        Notification::route('mail', env('NOTIFY_EMAIL_USERNAME'))->notify(new NewPaidOrderEmailNotify($order->id));
+
+        // 发送短信通知
+        $user = User::getUserById($order->user_id);
+        Notification::route(EasySmsChannel::class, new PhoneNumber($user->mobile, 86))->notify(new NewPaidOrderSmsNotify($user->username));
     }
 
     /**

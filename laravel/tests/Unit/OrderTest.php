@@ -163,4 +163,17 @@ class OrderTest extends TestCase
         $this->assertEquals('test2', User::find($this->user->id)->nickname);
         $user->save();
     }
+
+    /**
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     * @throws Throwable
+     */
+    public function testPayOrder()
+    {
+        $order = $this->createOrder()->refresh();
+        OrderService::getInstance()->payOrder($order, 'pay_id test');
+        dd($order->refresh()->toArray());
+    }
 }

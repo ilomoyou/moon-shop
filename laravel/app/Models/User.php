@@ -96,6 +96,15 @@ class User extends BaseModel implements
     ];
 
     /**
+     * @param $id
+     * @return User|Collection|Model|null
+     */
+    public static function getUserById($id)
+    {
+        return User::find($id);
+    }
+
+    /**
      * 根据多个ID获取用户列表
      * @param  array  $userIds
      * @return User[]|Collection
