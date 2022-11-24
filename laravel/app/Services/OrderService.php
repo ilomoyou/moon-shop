@@ -82,7 +82,7 @@ class OrderService extends BaseService
         $order->consignee = $address->name;
         $order->mobile = $address->tel;
         $order->address = $address->province.$address->city.$address->county." ".$address->address_detail;
-        $order->message = $input->message;
+        $order->message = $input->message ?: '';
         $order->integral_price = 0;
         $order->goods_price = $checkedGoodsPrice;
         $order->freight_price = $freightPrice;

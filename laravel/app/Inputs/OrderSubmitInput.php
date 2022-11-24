@@ -17,13 +17,13 @@ class OrderSubmitInput extends Input
     protected function rules()
     {
         return [
-            'cartId' => 'required|integer|min:0',
-            'addressId' => 'required|integer|min:0',
-            'couponId' => 'required|integer|min:0',
+            'cartId' => 'required|integer|min:-1',
+            'addressId' => 'required|integer|min:-1',
+            'couponId' => 'required|integer|min:-1',
             'userCouponId' => 'integer',
             'grouponRulesId' => 'integer',
             'grouponLinkId' => 'integer',
-            'message' => 'string',
+            'message' => 'nullable|string',
         ];
     }
 }
