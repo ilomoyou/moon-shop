@@ -162,6 +162,7 @@ export function cartList(query) {
   return request({
     url: CartList,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }
@@ -169,14 +170,16 @@ const CartAdd='/cart/add'; // 添加商品到购物车
 export function cartAdd(data) {
   return request({
     url: CartAdd,
+    version: 'v1',
     method: 'post',
     data
   })
 }
-const CartFastAdd='/cart/fastadd'; // 立即购买商品
+const CartFastAdd='/cart/fast-add'; // 立即购买商品
 export function cartFastAdd(data) {
   return request({
     url: CartFastAdd,
+    version: 'v1',
     method: 'post',
     data
   })
@@ -185,6 +188,7 @@ const CartUpdate='/cart/update'; // 更新购物车的商品
 export function cartUpdate(data) {
   return request({
     url: CartUpdate,
+    version: 'v1',
     method: 'post',
     data
   })
@@ -193,6 +197,7 @@ const CartDelete='/cart/delete'; // 删除购物车的商品
 export function cartDelete(data) {
   return request({
     url: CartDelete,
+    version: 'v1',
     method: 'post',
     data
   })
@@ -201,14 +206,16 @@ const CartChecked='/cart/checked'; // 选择或取消选择商品
 export function cartChecked(data) {
   return request({
     url: CartChecked,
+    version: 'v1',
     method: 'post',
     data
   })
 }
-const CartGoodsCount='/cart/goodscount'; // 获取购物车商品件数
+const CartGoodsCount='/cart/goods-count'; // 获取购物车商品件数
 export function cartGoodsCount() {
   return request({
     url: CartGoodsCount,
+    version: 'v1',
     method: 'get'
   })
 }
@@ -216,6 +223,7 @@ const CartCheckout='/cart/checkout'; // 下单前信息确认
 export function cartCheckout(query) {
   return request({
     url: CartCheckout,
+    version: 'v1',
     method: 'get',
     params: query
   })
@@ -315,6 +323,7 @@ const OrderSubmit='/order/submit'; // 提交订单
 export function orderSubmit(data) {
   return request({
     url: OrderSubmit,
+    version: 'v1',
     method: 'post',
     data
   })
@@ -355,6 +364,7 @@ const OrderCancel='/order/cancel'; //取消订单
 export function orderCancel(data) {
   return request({
     url: OrderCancel,
+    version: 'v1',
     method: 'post',
     data
   })
