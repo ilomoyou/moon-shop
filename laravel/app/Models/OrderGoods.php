@@ -57,4 +57,14 @@ class OrderGoods extends BaseModel
     {
         return self::query()->where('order_id', $orderId)->get();
     }
+
+    /**
+     * 统计订单商品数量
+     * @param $orderId
+     * @return int
+     */
+    public static function countOrderGoodsByOrderId($orderId)
+    {
+        return self::whereOrderId($orderId)->count(['id']);
+    }
 }

@@ -165,15 +165,61 @@ class OrderTest extends TestCase
     }
 
     /**
+     * 订单基础流程单测
      * @throws BusinessException
      * @throws NotFoundException
      * @throws ParametersException
      * @throws Throwable
      */
-    public function testPayOrder()
+    public function testBaseProcess()
     {
         $order = $this->createOrder()->refresh();
-        OrderService::getInstance()->payOrder($order, 'pay_id test');
-        dd($order->refresh()->toArray());
+        OrderService::getInstance()->payOrder($order, 'pay_id_test');
+        $this->assertEquals(OrderEnum::STATUS_PAY, $order->refresh()->order_status);
+        $this->assertEquals('pay_id_test', $order->pay_id);
+
+        $shipSn = '1234567';
+        $shipChannel = '顺丰';
+        OrderService::getInstance()->ship($this->user->id, $order->id, $shipSn, $shipChannel);
+        $order->refresh();
+        $this->assertEquals(OrderEnum::STATUS_SHIP, $order->order_status);
+        $this->assertEquals($shipSn, $order->ship_sn);
+        $this->assertEquals($shipChannel, $order->ship_channel);
+
+        OrderService::getInstance()->confirm($this->user->id, $order->id);
+        $order->refresh();
+        $this->assertEquals(2, $order->comments);
+        $this->assertEquals(OrderEnum::STATUS_CONFIRM, $order->order_status);
+
+        OrderService::getInstance()->delete($this->user->id, $order->id);
+        $this->assertNull(Order::find($order->id));
+    }
+
+    /**
+     * 订单退款流程单测
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     * @throws Throwable
+     */
+    public function testRefundProcess()
+    {
+        $order = $this->createOrder()->refresh();
+        OrderService::getInstance()->payOrder($order, 'pay_id_test');
+        $this->assertEquals(OrderEnum::STATUS_PAY, $order->refresh()->order_status);
+        $this->assertEquals('pay_id_test', $order->pay_id);
+
+        OrderService::getInstance()->refund($this->user->id, $order->id);
+        $order->refresh();
+        $this->assertEquals(OrderEnum::STATUS_REFUND, $order->order_status);
+
+        OrderService::getInstance()->agreeRefund($order->refresh(), '微信退款', '123');
+        $order->refresh();
+        $this->assertEquals(OrderEnum::STATUS_REFUND_CONFIRM, $order->order_status);
+        $this->assertEquals('微信退款', $order->refund_type);
+        $this->assertEquals('123', $order->refund_content);
+
+        OrderService::getInstance()->delete($this->user->id, $order->id);
+        $this->assertNull(Order::find($order->id));
     }
 }

@@ -72,6 +72,9 @@ Route::prefix('cart')->group(function () {
 Route::prefix('order')->group(function () {
     Route::post('submit', [OrderController::class, 'submit']); // 提交订单
     Route::post('cancel', [OrderController::class, 'cancel']); // 取消订单
+    Route::post('refund', [OrderController::class, 'refund']); // 申请退款
+    Route::post('confirm', [OrderController::class, 'confirm']); // 确定收货
+    Route::post('delete', [OrderController::class, 'delete']); // 删除订单
 });
 
 // 团购列表

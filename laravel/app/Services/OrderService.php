@@ -152,12 +152,13 @@ class OrderService extends BaseService
 
     /**
      * 还原库存
-     * @param  OrderGoods[]|Collection  $orderGoodsList
+     * @param $orderId
      * @throws BusinessException
      * @throws \Throwable
      */
-    public function restoreProductsStock($orderGoodsList)
+    public function restoreProductsStock($orderId)
     {
+        $orderGoodsList = OrderGoods::getOrderGoodsListByOrderId($orderId);
         foreach ($orderGoodsList as $orderGoods) {
             GoodsProductService::getInstance()->restoreStock($orderGoods->product_id, $orderGoods->number);
         }
@@ -240,8 +241,7 @@ class OrderService extends BaseService
         }
 
         // 还原库存
-        $orderGoodsList = OrderGoods::getOrderGoodsListByOrderId($order->id);
-        $this->restoreProductsStock($orderGoodsList);
+        $this->restoreProductsStock($order->id);
     }
 
     /**
@@ -341,5 +341,141 @@ class OrderService extends BaseService
         $orderTotalPrice = bcadd($goodsPrice, $freightPrice, 2); // 加运费
         $orderTotalPrice = bcsub($orderTotalPrice, $discountPrice, 2); // 减优惠券优惠金额
         return max(0, $orderTotalPrice);
+    }
+
+    /**
+     * 发货
+     * @param $userId
+     * @param $orderId
+     * @param $shipSn
+     * @param $shipChannel
+     * @return Order
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws \Throwable
+     */
+    public function ship($userId, $orderId, $shipSn, $shipChannel)
+    {
+        $order = Order::getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            throw new NotFoundException('order is not found');
+        }
+
+        if (!$order->canShipHandle()) {
+            throw new BusinessException(ResponseCode::ORDER_INVALID_OPERATION, '订单发货无效');
+        }
+        $order->order_status = OrderEnum::STATUS_SHIP;
+        $order->ship_sn = $shipSn;
+        $order->ship_channel = $shipChannel;
+        $order->ship_time = now()->toDateTimeString();
+        if (!$order->cas()) {
+            throw new BusinessException(ResponseCode::UPDATED_FAIL);
+        }
+        return $order;
+    }
+
+    /**
+     * 申请退款
+     * @param $userId
+     * @param $orderId
+     * @return Order
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws \Throwable
+     */
+    public function refund($userId, $orderId)
+    {
+        $order = Order::getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            throw new NotFoundException('order is not found');
+        }
+
+        if (!$order->canRefundHandle()) {
+            throw new BusinessException(ResponseCode::ORDER_INVALID_OPERATION, '订单退款申请无效');
+        }
+        $order->order_status = OrderEnum::STATUS_REFUND;
+        if (!$order->cas()) {
+            throw new BusinessException(ResponseCode::UPDATED_FAIL);
+        }
+        return $order;
+    }
+
+    /**
+     * 同意退款
+     * @param  Order  $order
+     * @param $refundType
+     * @param $refundContent
+     * @return Order
+     * @throws BusinessException
+     * @throws \Throwable
+     */
+    public function agreeRefund(Order $order, $refundType, $refundContent)
+    {
+        if (!$order->canAgreeRefundHandle()) {
+            throw new BusinessException(ResponseCode::ORDER_INVALID_OPERATION, '订单同意退款无效');
+        }
+
+        $now = now()->toDateTimeString();
+        $order->order_status = OrderEnum::STATUS_REFUND_CONFIRM;
+        $order->end_time = $now;
+        $order->refund_amount = $order->actual_price;
+        $order->refund_type = $refundType;
+        $order->refund_content = $refundContent;
+        $order->refund_time = $now;
+        if (!$order->cas()) {
+            throw new BusinessException(ResponseCode::UPDATED_FAIL);
+        }
+
+        $this->restoreProductsStock($order->id);
+        return $order;
+    }
+
+    /**
+     * 确认收货
+     * @param $userId
+     * @param $orderId
+     * @param  false  $isAuto
+     * @return Order
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws \Throwable
+     */
+    public function confirm($userId, $orderId, bool $isAuto = false)
+    {
+        $order = Order::getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            throw new NotFoundException('order is not found');
+        }
+
+        if (!$order->canConfirmHandle()) {
+            throw new BusinessException(ResponseCode::ORDER_INVALID_OPERATION, '订单确认收货无效');
+        }
+        $order->comments = OrderGoods::countOrderGoodsByOrderId($order->id);
+        $order->order_status = $isAuto ? OrderEnum::STATUS_AUTO_CONFIRM : OrderEnum::STATUS_CONFIRM;
+        $order->confirm_time = now()->toDateTimeString();
+        if (!$order->cas()) {
+            throw new BusinessException(ResponseCode::UPDATED_FAIL);
+        }
+        return $order;
+    }
+
+    /**
+     * 删除订单
+     * @param $userId
+     * @param $orderId
+     * @throws BusinessException
+     * @throws NotFoundException
+     */
+    public function delete($userId, $orderId)
+    {
+        $order = Order::getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            throw new NotFoundException('order is not found');
+        }
+
+        if (!$order->canDeleteHandle()) {
+            throw new BusinessException(ResponseCode::ORDER_INVALID_OPERATION, '订单删除无效');
+        }
+        $order->delete();
     }
 }

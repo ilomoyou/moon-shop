@@ -4,6 +4,8 @@
 namespace App\Http\Controllers\Wx;
 
 
+use App\Exceptions\BusinessException;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\ParametersException;
 use App\Inputs\OrderSubmitInput;
 use App\Services\OrderService;
@@ -50,5 +52,49 @@ class OrderController extends BaseController
         $orderId = $this->verifyId('orderId');
         OrderService::getInstance()->userCancelOrder($this->userId(), $orderId);
         $this->success();
+    }
+
+    /**
+     * 申请退款
+     * @return JsonResponse
+     * @throws ParametersException
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws \Throwable
+     */
+    public function refund()
+    {
+        $orderId = $this->verifyId('orderId');
+        OrderService::getInstance()->refund($this->userId(), $orderId);
+        return $this->success();
+    }
+
+    /**
+     * 确认收货
+     * @return JsonResponse
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     * @throws \Throwable
+     */
+    public function confirm()
+    {
+        $orderId = $this->verifyId('orderId');
+        OrderService::getInstance()->confirm($this->userId(), $orderId);
+        return $this->success();
+    }
+
+    /**
+     * 删除订单
+     * @return JsonResponse
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     */
+    public function delete()
+    {
+        $orderId = $this->verifyId('orderId');
+        OrderService::getInstance()->delete($this->userId(), $orderId);
+        return $this->success();
     }
 }

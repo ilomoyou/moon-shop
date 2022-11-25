@@ -45,7 +45,7 @@ class GoodsProductFactory extends Factory
             GrouponRules::factory()->create([
                 'goods_id' => $product->goods_id,
                 'goods_name' => $goods->name,
-                'pic_url' => $goods->pic_url,
+                'pic_url' => 'http://yanxuan.nosdn.127.net/8ab2d3287af0cefa2cc539e40600621d.png',
                 'discount' => 1
             ]);
         });
