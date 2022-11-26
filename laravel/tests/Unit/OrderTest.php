@@ -186,7 +186,8 @@ class OrderTest extends TestCase
         $this->assertEquals($shipSn, $order->ship_sn);
         $this->assertEquals($shipChannel, $order->ship_channel);
 
-        OrderService::getInstance()->confirm($this->user->id, $order->id);
+        $order = Order::getOrderByUserIdAndId($this->user->id, $order->id);
+        OrderService::getInstance()->confirm($order);
         $order->refresh();
         $this->assertEquals(2, $order->comments);
         $this->assertEquals(OrderEnum::STATUS_CONFIRM, $order->order_status);

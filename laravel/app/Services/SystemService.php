@@ -14,6 +14,16 @@ class SystemService extends BaseService
 
     // 订单相关配置
     const ORDER_UNPAID = 'litemall_order_unpaid';
+    const ORDER_UNCONFIRMED = 'litemall_order_unconfirm';
+
+    /**
+     * 获取订单超时未确认收货期限天数
+     * @return int
+     */
+    public function getOrderUnconfirmedDays()
+    {
+        return (int) $this->get(self::ORDER_UNCONFIRMED);
+    }
 
     /**
      * 获取未支付订单超时时间

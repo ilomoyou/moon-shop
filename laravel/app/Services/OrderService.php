@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
 use Overtrue\EasySms\PhoneNumber;
+use Throwable;
 
 class OrderService extends BaseService
 {
@@ -154,7 +155,7 @@ class OrderService extends BaseService
      * 还原库存
      * @param $orderId
      * @throws BusinessException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function restoreProductsStock($orderId)
     {
@@ -168,7 +169,7 @@ class OrderService extends BaseService
      * 用户取消订单
      * @param $userId
      * @param $orderId
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function userCancelOrder($userId, $orderId)
     {
@@ -181,7 +182,7 @@ class OrderService extends BaseService
      * 管理员取消订单
      * @param $userId
      * @param $orderId
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function adminCancelOrder($userId, $orderId)
     {
@@ -194,7 +195,7 @@ class OrderService extends BaseService
      * 系统自动取消订单
      * @param $userId
      * @param $orderId
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function systemCancelOrder($userId, $orderId)
     {
@@ -211,7 +212,7 @@ class OrderService extends BaseService
      * @return void
      * @throws BusinessException
      * @throws NotFoundException
-     * @throws \Throwable
+     * @throws Throwable
      */
     private function cancelOrder($userId, $orderId, string $role = OrderEnum::CANCELLED_ROLE_USER): void
     {
@@ -250,7 +251,7 @@ class OrderService extends BaseService
      * @param $payId
      * @return Order
      * @throws BusinessException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function payOrder(Order $order, $payId)
     {
@@ -352,7 +353,7 @@ class OrderService extends BaseService
      * @return Order
      * @throws BusinessException
      * @throws NotFoundException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function ship($userId, $orderId, $shipSn, $shipChannel)
     {
@@ -381,7 +382,7 @@ class OrderService extends BaseService
      * @return Order
      * @throws BusinessException
      * @throws NotFoundException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function refund($userId, $orderId)
     {
@@ -407,7 +408,7 @@ class OrderService extends BaseService
      * @param $refundContent
      * @return Order
      * @throws BusinessException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function agreeRefund(Order $order, $refundType, $refundContent)
     {
@@ -432,17 +433,15 @@ class OrderService extends BaseService
 
     /**
      * 确认收货
-     * @param $userId
-     * @param $orderId
+     * @param  Order  $order
      * @param  false  $isAuto
      * @return Order
      * @throws BusinessException
      * @throws NotFoundException
-     * @throws \Throwable
+     * @throws Throwable
      */
-    public function confirm($userId, $orderId, bool $isAuto = false)
+    public function confirm(Order $order, bool $isAuto = false)
     {
-        $order = Order::getOrderByUserIdAndId($userId, $orderId);
         if (empty($order)) {
             throw new NotFoundException('order is not found');
         }
@@ -457,6 +456,43 @@ class OrderService extends BaseService
             throw new BusinessException(ResponseCode::UPDATED_FAIL);
         }
         return $order;
+    }
+
+    /**
+     * 系统自动确认收货
+     * @throws Throwable
+     */
+    public function autoConfirm()
+    {
+        Log::info('Auto confirm start.');
+        $orderList = $this->getTimeoutUnconfirmedOrderList();
+        if (is_null($orderList)) {
+            return;
+        }
+        foreach ($orderList as $order) {
+            try {
+                $this->confirm($order, true);
+            } catch (BusinessException $e) {
+                Log::error("Auto confirm business error. Error: {$e->getMessage()}");
+            } catch (Throwable $e) {
+                Log::error("Auto confirm system error. Error: {$e->getMessage()}");
+            }
+        }
+        Log::info('Auto confirm end.');
+    }
+
+    /**
+     * 获取超时未确认收货的订单列表
+     * @return Order[]
+     */
+    private function getTimeoutUnconfirmedOrderList()
+    {
+        $days = SystemService::getInstance()->getOrderUnconfirmedDays();
+        return Order::query()
+            ->where('order_status', OrderEnum::STATUS_SHIP)
+            ->where('ship_time', '<=', now()->subDays($days))
+            ->where('ship_time', '>=', now()->subDays($days + 30)) // 只扫描一个区间防止扫描过长
+            ->get();
     }
 
     /**

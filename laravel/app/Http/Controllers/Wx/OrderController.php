@@ -8,6 +8,7 @@ use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\ParametersException;
 use App\Inputs\OrderSubmitInput;
+use App\Models\Order;
 use App\Services\OrderService;
 use App\util\ResponseCode;
 use Illuminate\Http\JsonResponse;
@@ -80,7 +81,8 @@ class OrderController extends BaseController
     public function confirm()
     {
         $orderId = $this->verifyId('orderId');
-        OrderService::getInstance()->confirm($this->userId(), $orderId);
+        $order = Order::getOrderByUserIdAndId($this->userId(), $orderId);
+        OrderService::getInstance()->confirm($order);
         return $this->success();
     }
 

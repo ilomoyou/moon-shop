@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Services\OrderService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -15,7 +16,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // 订单自动确认收货任务调度
+        $schedule->call(function () {
+            OrderService::getInstance()->autoConfirm();
+        })->dailyAt('3:00')->runInBackground()->name('auto confirm')->onOneServer();
     }
 
     /**
