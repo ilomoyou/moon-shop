@@ -82,6 +82,13 @@ class Order extends BaseModel
 {
     use OrderStatusTrait;
 
+    protected $casts = [
+        'goods_price' => 'float',
+        'freight_price' => 'float',
+        'coupon_price' => 'float',
+        'actual_price' => 'float'
+    ];
+
     /**
      * @param $userId
      * @param $id

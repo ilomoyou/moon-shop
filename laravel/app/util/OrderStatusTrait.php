@@ -63,6 +63,42 @@ trait OrderStatusTrait
     }
 
     /**
+     * 是否可评价
+     * @return bool
+     */
+    public function canCommentHandle()
+    {
+        return in_array($this->order_status, [
+            OrderEnum::STATUS_CONFIRM,
+            OrderEnum::STATUS_AUTO_CONFIRM
+        ]);
+    }
+
+    /**
+     * 是否可再次购买
+     * @return bool
+     */
+    public function canRebuyHandle()
+    {
+        return in_array($this->order_status, [
+            OrderEnum::STATUS_CONFIRM,
+            OrderEnum::STATUS_AUTO_CONFIRM
+        ]);
+    }
+
+    /**
+     * 是否可售后
+     * @return bool
+     */
+    public function canAfterSaleHandle()
+    {
+        return in_array($this->order_status, [
+            OrderEnum::STATUS_CONFIRM,
+            OrderEnum::STATUS_AUTO_CONFIRM
+        ]);
+    }
+
+    /**
      * 是否可删除
      * @return bool
      */
@@ -76,5 +112,32 @@ trait OrderStatusTrait
             OrderEnum::STATUS_CONFIRM,
             OrderEnum::STATUS_AUTO_CONFIRM
         ]);
+    }
+
+    /**
+     * 发货状态
+     * @return bool
+     */
+    public function isShipStatus()
+    {
+        return $this->order_status == OrderEnum::STATUS_SHIP;
+    }
+
+    /**
+     * 订单可执行的操作选项
+     * @return array
+     */
+    public function getCanHandleOptions()
+    {
+        return [
+            'cancel' => $this->canCancelHandle(),
+            'delete' => $this->canDeleteHandle(),
+            'pay' => $this->canPayHandle(),
+            'comment' => $this->canCommentHandle(),
+            'confirm' => $this->canConfirmHandle(),
+            'refund' => $this->canRefundHandle(),
+            'rebuy' => $this->canRebuyHandle(),
+            'aftersale' => $this->canAfterSaleHandle(),
+        ];
     }
 }

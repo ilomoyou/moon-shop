@@ -87,6 +87,19 @@ class OrderController extends BaseController
     }
 
     /**
+     * 获取订单详情
+     * @return JsonResponse
+     * @throws NotFoundException
+     * @throws ParametersException
+     */
+    public function detail()
+    {
+        $orderId = $this->verifyId('orderId');
+        $order = OrderService::getInstance()->detail($this->userId(), $orderId);
+        return $this->success($order);
+    }
+
+    /**
      * 删除订单
      * @return JsonResponse
      * @throws BusinessException

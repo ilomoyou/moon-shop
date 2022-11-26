@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Services\AddressService;
 use App\Services\CartService;
 use App\Services\OrderService;
+use App\util\Express;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -222,5 +223,11 @@ class OrderTest extends TestCase
 
         OrderService::getInstance()->delete($this->user->id, $order->id);
         $this->assertNull(Order::find($order->id));
+    }
+
+    public function testExpress()
+    {
+        $ret = (new Express())->getOrderTraces('YTO', '12345678');
+        dd($ret);
     }
 }

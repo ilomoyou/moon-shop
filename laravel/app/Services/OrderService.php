@@ -18,7 +18,9 @@ use App\Models\OrderGoods;
 use App\Models\User;
 use App\Notifications\NewPaidOrderEmailNotify;
 use App\Notifications\NewPaidOrderSmsNotify;
+use App\util\Express;
 use App\util\ResponseCode;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -493,6 +495,45 @@ class OrderService extends BaseService
             ->where('ship_time', '<=', now()->subDays($days))
             ->where('ship_time', '>=', now()->subDays($days + 30)) // 只扫描一个区间防止扫描过长
             ->get();
+    }
+
+    /**
+     * 获取订单详情
+     * @param $userId
+     * @param $orderId
+     * @return array
+     * @throws NotFoundException
+     */
+    public function detail($userId, $orderId)
+    {
+        $order = Order::getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            throw new NotFoundException('order is not found');
+        }
+
+        $detail = Arr::only($order->toArray(), [
+            "id", "orderSn", "message", "addTime", "consignee", "mobile", "address", "goodsPrice", "couponPrice", "freightPrice", "actualPrice", "aftersaleStatus",
+        ]);
+        $detail['orderStatusText'] = OrderEnum::STATUS_TEXT_MAP[$order->order_status] ?? '';
+        $detail['handleOption'] = $order->getCanHandleOptions();
+
+        // 物流信息
+        $express = [];
+        if ($order->isShipStatus()) {
+            $detail['expCode'] = $order->ship_channel;
+            $detail['expNo'] = $order->ship_sn;
+            $detail['expName'] = Express::getExpressName($order->ship_channel);
+            $express = (new Express())->getOrderTraces($order->ship_channel, $order->ship_sn);
+        }
+
+        // 订单商品信息
+        $goodsList = OrderGoods::getOrderGoodsListByOrderId($order->id);
+
+        return [
+            'orderInfo' => $detail,
+            'orderGoods' => $goodsList,
+            'expressInfo' => $express
+        ];
     }
 
     /**
