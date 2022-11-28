@@ -4,7 +4,6 @@
 namespace App\Models;
 
 
-use App\util\OrderStatusTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 

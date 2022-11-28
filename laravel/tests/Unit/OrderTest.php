@@ -230,4 +230,22 @@ class OrderTest extends TestCase
         $ret = (new Express())->getOrderTraces('YTO', '12345678');
         dd($ret);
     }
+
+    /**
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     */
+    public function testOrderStatusTrait()
+    {
+        $order = $this->createOrder();
+        $this->assertEquals(true, $order->isCreateStatus());
+        $this->assertEquals(false, $order->isCancelStatus());
+        $this->assertEquals(false, $order->isPayStatus());
+
+        $this->assertEquals(true, $order->canCancelHandle());
+        $this->assertEquals(true, $order->canPayHandle());
+        $this->assertEquals(false, $order->canDeleteHandle());
+        $this->assertEquals(false, $order->canConfirmHandle());
+    }
 }
