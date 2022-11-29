@@ -349,6 +349,7 @@ export function orderList(query) {
   return request({
     url: OrderList,
     method: 'get',
+    version: 'v1',
     params: query
   })
 }
@@ -356,6 +357,7 @@ const OrderDetail='/order/detail'; //订单详情
 export function orderDetail(query) {
   return request({
     url: OrderDetail,
+    version: 'v1',
     method: 'get',
     params: query
   })
@@ -373,6 +375,7 @@ const OrderRefund='/order/refund'; //退款取消订单
 export function orderRefund(data) {
   return request({
     url: OrderRefund,
+    version: 'v1',
     method: 'post',
     data
   })
@@ -381,6 +384,7 @@ const OrderDelete='/order/delete'; //删除订单
 export function orderDelete(data) {
   return request({
     url: OrderDelete,
+    version: 'v1',
     method: 'post',
     data
   })
@@ -389,6 +393,7 @@ const OrderConfirm='/order/confirm'; //确认收货
 export function orderConfirm(data) {
   return request({
     url: OrderConfirm,
+    version: 'v1',
     method: 'post',
     data
   })
