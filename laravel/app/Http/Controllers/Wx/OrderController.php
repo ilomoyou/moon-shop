@@ -4,14 +4,19 @@
 namespace App\Http\Controllers\Wx;
 
 
+use App\enum\OrderEnum;
 use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\ParametersException;
 use App\Inputs\OrderSubmitInput;
+use App\Inputs\PageInput;
+use App\Models\Groupon;
 use App\Models\Order;
+use App\Models\OrderGoods;
 use App\Services\OrderService;
 use App\util\ResponseCode;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +50,7 @@ class OrderController extends BaseController
 
     /**
      * 用户主动取消订单
+     * @return JsonResponse
      * @throws ParametersException
      * @throws \Throwable
      */
@@ -52,7 +58,7 @@ class OrderController extends BaseController
     {
         $orderId = $this->verifyId('orderId');
         OrderService::getInstance()->userCancelOrder($this->userId(), $orderId);
-        $this->success();
+        return $this->success();
     }
 
     /**
@@ -97,6 +103,38 @@ class OrderController extends BaseController
         $orderId = $this->verifyId('orderId');
         $order = OrderService::getInstance()->detail($this->userId(), $orderId);
         return $this->success($order);
+    }
+
+    /**
+     * 订单列表
+     * @return JsonResponse
+     * @throws ParametersException
+     */
+    public function list()
+    {
+        $page = PageInput::new();
+        $showType = $this->verifyEnum('showType', 0, array_keys(OrderEnum::SHOW_TYPE_STATUS_MAP));
+        $status = OrderEnum::SHOW_TYPE_STATUS_MAP[$showType];
+
+        $orderListWithPage = OrderService::getInstance()->getOrderListByStatus($this->userId(), $page, $status);
+        $orderList = collect($orderListWithPage->items());
+        $orderIds = $orderList->pluck('id')->toArray();
+        if (empty($orderIds)) {
+            $this->successPaginate($orderListWithPage);
+        }
+
+        $grouponOrderIds = Groupon::getGrouponOrderIdListInOrderIds($orderIds);
+        $orderGoodsList = OrderGoods::getOrderGoodsListByOrderIds($orderIds)->groupBy('order_id');
+        $list = $orderList->map(function (Order $order) use ($orderGoodsList, $grouponOrderIds) {
+            /** @var Collection $goodsList */
+            $goodsList = $orderGoodsList->get($order->id);
+            $goodsListVO = $goodsList->map(function (OrderGoods $orderGoods) {
+               return OrderService::getInstance()->coverOrderGoodsVo($orderGoods);
+            });
+            return OrderService::getInstance()->coverOrderVo($order, $grouponOrderIds, $goodsListVO);
+        });
+
+        return $this->successPaginate($orderListWithPage, $list->toArray());
     }
 
     /**

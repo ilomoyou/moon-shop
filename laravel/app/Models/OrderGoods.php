@@ -4,6 +4,7 @@
 namespace App\Models;
 
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -23,23 +24,23 @@ use Illuminate\Database\Eloquent\Collection;
  * @property \Illuminate\Support\Carbon|null $add_time 创建时间
  * @property \Illuminate\Support\Carbon|null $update_time 更新时间
  * @property bool|null $deleted 逻辑删除
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods query()
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereAddTime($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereComment($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereDeleted($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereGoodsId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereGoodsName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereGoodsSn($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereOrderId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods wherePicUrl($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods wherePrice($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereProductId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereSpecifications($value)
- * @method static \Illuminate\Database\Eloquent\Builder|OrderGoods whereUpdateTime($value)
+ * @method static Builder|OrderGoods newModelQuery()
+ * @method static Builder|OrderGoods newQuery()
+ * @method static Builder|OrderGoods query()
+ * @method static Builder|OrderGoods whereAddTime($value)
+ * @method static Builder|OrderGoods whereComment($value)
+ * @method static Builder|OrderGoods whereDeleted($value)
+ * @method static Builder|OrderGoods whereGoodsId($value)
+ * @method static Builder|OrderGoods whereGoodsName($value)
+ * @method static Builder|OrderGoods whereGoodsSn($value)
+ * @method static Builder|OrderGoods whereId($value)
+ * @method static Builder|OrderGoods whereNumber($value)
+ * @method static Builder|OrderGoods whereOrderId($value)
+ * @method static Builder|OrderGoods wherePicUrl($value)
+ * @method static Builder|OrderGoods wherePrice($value)
+ * @method static Builder|OrderGoods whereProductId($value)
+ * @method static Builder|OrderGoods whereSpecifications($value)
+ * @method static Builder|OrderGoods whereUpdateTime($value)
  * @mixin \Eloquent
  */
 class OrderGoods extends BaseModel
@@ -56,6 +57,19 @@ class OrderGoods extends BaseModel
     public static function getOrderGoodsListByOrderId($orderId)
     {
         return self::query()->where('order_id', $orderId)->get();
+    }
+
+    /**
+     * 获取订单商品列表
+     * @param $orderIds
+     * @return Builder[]|Collection|\Illuminate\Support\Collection
+     */
+    public static function getOrderGoodsListByOrderIds($orderIds)
+    {
+        if (empty($orderIds)) {
+            return collect();
+        }
+        return self::query()->whereIn('order_id', $orderIds)->get();
     }
 
     /**

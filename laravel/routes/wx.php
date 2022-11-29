@@ -76,6 +76,7 @@ Route::prefix('order')->group(function () {
     Route::post('confirm', [OrderController::class, 'confirm']); // 确定收货
     Route::post('delete', [OrderController::class, 'delete']); // 删除订单
     Route::get('detail', [OrderController::class, 'detail']); // 订单详情
+    Route::get('list', [OrderController::class, 'list']); // 订单列表
 });
 
 // 团购列表

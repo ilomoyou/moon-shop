@@ -92,4 +92,14 @@ class Groupon extends BaseModel
             })->where('status', '!=', GrouponEnum::STATUS_NONE)
             ->exists();
     }
+
+    /**
+     * 获取团购活动订单ID列表
+     * @param $orderIds
+     * @return array
+     */
+    public static function getGrouponOrderIdListInOrderIds($orderIds)
+    {
+        return Groupon::query()->whereIn('order_id', $orderIds)->pluck('order_id')->toArray();
+    }
 }

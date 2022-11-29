@@ -95,11 +95,12 @@ class BaseController extends Controller
     /**
      * 成功统一返回分页数据格式
      * @param $page
+     * @param  null  $list
      * @return JsonResponse
      */
-    protected function successPaginate($page)
+    protected function successPaginate($page, $list = null)
     {
-        return $this->success($this->paginate($page));
+        return $this->success($this->paginate($page, $list));
     }
 
     /**

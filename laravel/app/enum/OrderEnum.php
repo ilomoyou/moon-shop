@@ -44,4 +44,21 @@ class OrderEnum
         self::STATUS_CONFIRM => "已收货",
         self::STATUS_AUTO_CONFIRM => "已收货(系统)",
     ];
+
+    /**
+     * 订单列表展示类型
+     */
+    const SHOW_TYPE_ALL  = 0; // 全部订单
+    const SHOW_TYPE_WAIT_PAY = 1; // 待付款订单
+    const SHOW_TYPE_WAIT_DELIVERY = 2; // 待发货订单
+    const SHOW_TYPE_WAIT_RECEIPT = 3; // 待收货订单
+    const SHOW_TYPE_WAIT_COMMENT = 4; // 待评价订单
+
+    const SHOW_TYPE_STATUS_MAP = [
+        self::SHOW_TYPE_ALL => [],
+        self::SHOW_TYPE_WAIT_PAY => [self::STATUS_CREATE],
+        self::SHOW_TYPE_WAIT_DELIVERY => [self::STATUS_PAY],
+        self::SHOW_TYPE_WAIT_RECEIPT => [self::STATUS_SHIP],
+        self::SHOW_TYPE_WAIT_COMMENT => [self::STATUS_CONFIRM]
+    ];
 }

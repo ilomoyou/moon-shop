@@ -8,6 +8,7 @@ use App\enum\OrderEnum;
 use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
 use App\Inputs\OrderSubmitInput;
+use App\Inputs\PageInput;
 use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Cart;
 use App\Models\Coupon;
@@ -20,6 +21,8 @@ use App\Notifications\NewPaidOrderEmailNotify;
 use App\Notifications\NewPaidOrderSmsNotify;
 use App\util\Express;
 use App\util\ResponseCode;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -32,6 +35,60 @@ use Throwable;
 
 class OrderService extends BaseService
 {
+    /**
+     * 根据订单状态获取订单列表
+     * @param $userId
+     * @param  PageInput  $page
+     * @param  array  $status
+     * @return LengthAwarePaginator
+     */
+    public function getOrderListByStatus($userId, PageInput $page, array $status = [])
+    {
+        return Order::query()->where('user_id', $userId)
+            ->when(!empty($status), function (Builder $query) use ($status) {
+                return $query->whereIn('order_status', $status);
+            })->orderBy($page->sort, $page->order)
+            ->paginate($page->limit, ['*'], 'page', $page->page);
+    }
+
+    /**
+     * 订单商品VO
+     * @param  OrderGoods  $orderGoods
+     * @return array
+     */
+    public function coverOrderGoodsVo(OrderGoods $orderGoods)
+    {
+        return [
+            "id" => $orderGoods->id,
+            "goodsName" => $orderGoods->goods_name,
+            "number" => $orderGoods->number,
+            "picUrl" => $orderGoods->pic_url,
+            "specifications" => $orderGoods->specifications,
+            "price" => $orderGoods->price,
+        ];
+    }
+
+    /**
+     * 订单VO
+     * @param  Order  $order
+     * @param  array  $grouponOrderIds
+     * @param  array|Collection  $goodsList
+     * @return array
+     */
+    public function coverOrderVo(Order $order, array $grouponOrderIds = [], $goodsList = [])
+    {
+        return [
+            "id" => $order->id,
+            "orderSn" => $order->order_sn,
+            "actualPrice" => $order->actual_price,
+            "orderStatusText" => OrderEnum::STATUS_TEXT_MAP[$order->order_status] ?? '',
+            "handleOption" => $order->getCanHandleOptions(),
+            "aftersaleStatus" => $order->aftersale_status,
+            "isGroupon" => in_array($order->id, $grouponOrderIds),
+            "goodsList" => $goodsList,
+        ];
+    }
+
     /**
      * 提交订单
      * @param $userId
@@ -512,7 +569,8 @@ class OrderService extends BaseService
         }
 
         $detail = Arr::only($order->toArray(), [
-            "id", "orderSn", "message", "addTime", "consignee", "mobile", "address", "goodsPrice", "couponPrice", "freightPrice", "actualPrice", "aftersaleStatus",
+            "id", "orderSn", "message", "addTime", "consignee", "mobile", "address", "goodsPrice", "couponPrice",
+            "freightPrice", "actualPrice", "aftersaleStatus",
         ]);
         $detail['orderStatusText'] = OrderEnum::STATUS_TEXT_MAP[$order->order_status] ?? '';
         $detail['handleOption'] = $order->getCanHandleOptions();
