@@ -97,4 +97,14 @@ class Order extends BaseModel
     {
         return self::query()->where('user_id', $userId)->find($id);
     }
+
+    /**
+     * 根据订单编号获取订单
+     * @param $orderSn
+     * @return Order|Model|object|null
+     */
+    public static function getOrderByOrderSn($orderSn)
+    {
+        return self::whereOrderSn($orderSn)->first();
+    }
 }

@@ -77,6 +77,8 @@ Route::prefix('order')->group(function () {
     Route::post('delete', [OrderController::class, 'delete']); // 删除订单
     Route::get('detail', [OrderController::class, 'detail']); // 订单详情
     Route::get('list', [OrderController::class, 'list']); // 订单列表
+    Route::post('h5pay', [OrderController::class, 'h5pay']); // 微信h5支付
+    Route::post('wx-notify', [OrderController::class, 'wxNotify']); // 微信h5支付回调
 });
 
 // 团购列表

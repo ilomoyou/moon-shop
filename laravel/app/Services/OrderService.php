@@ -23,6 +23,7 @@ use App\util\Express;
 use App\util\ResponseCode;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -612,5 +613,62 @@ class OrderService extends BaseService
             throw new BusinessException(ResponseCode::ORDER_INVALID_OPERATION, '订单删除无效');
         }
         $order->delete();
+    }
+
+    /**
+     * 获取微信支付订单信息
+     * @param $userId
+     * @param $orderId
+     * @return array
+     * @throws BusinessException
+     * @throws NotFoundException
+     */
+    public function getWxPayOrder($userId, $orderId)
+    {
+        $order = Order::getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            throw new NotFoundException('this order is not found');
+        }
+        if ($order->canPayHandle()) {
+            throw new BusinessException(ResponseCode::ORDER_PAY_FAIL, '订单支付无效');
+        }
+
+        return [
+            'out_trade_no' => $order->order_sn,
+            'subject' => "订单：{$order->order_sn}",
+            'total_amount' => bcmul($order->actual_price, 100)
+        ];
+    }
+
+    /**
+     * 微信支付回调
+     * @param  array  $data
+     * @return Order|Model|object
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws Throwable
+     */
+    public function wxNotify(array $data)
+    {
+        $orderSn = $data['out_trade_no'] ?? '';
+        $payId = $data['transaction_id'] ?? '';
+        $price = bcdiv($data['total_fee'], 100, 2);
+
+        $order = Order::getOrderByOrderSn($orderSn);
+        if (is_null($order)) {
+            throw new NotFoundException('this order is not found');
+        }
+
+        if ($order->isHadPaid()) {
+            return $order;
+        }
+
+        if (bccomp($order->actual_price, $price, 2) != 0) {
+            throw new BusinessException(
+                ResponseCode::FAIL,
+                "支付回调,订单[{$order->id}]金额不一致,[total_amount={$price}],订单金额[actual_price={$order->actual_price}]");
+        }
+
+        return $this->payOrder($order, $payId);
     }
 }

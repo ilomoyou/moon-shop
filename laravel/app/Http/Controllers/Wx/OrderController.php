@@ -19,9 +19,17 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Yansongda\LaravelPay\Facades\Pay;
+use Yansongda\Pay\Exceptions\InvalidArgumentException;
+use Yansongda\Pay\Exceptions\InvalidSignException;
 
 class OrderController extends BaseController
 {
+    protected $except = ['wxNotify'];
+
     /**
      * 提交订单
      * @return JsonResponse
@@ -149,5 +157,37 @@ class OrderController extends BaseController
         $orderId = $this->verifyId('orderId');
         OrderService::getInstance()->delete($this->userId(), $orderId);
         return $this->success();
+    }
+
+    /**
+     * 微信H5支付
+     * @return RedirectResponse
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     */
+    public function h5pay()
+    {
+        $orderId = $this->verifyId('orderId');
+        $order = OrderService::getInstance()->getWxPayOrder($this->userId(), $orderId);
+        return Pay::wechat()->wap($order);
+    }
+
+    /**
+     * 微信支付回调
+     * @return Response
+     * @throws \Throwable
+     * @throws InvalidArgumentException
+     * @throws InvalidSignException
+     */
+    public function wxNotify()
+    {
+        $data = Pay::wechat()->verify();
+        $data = $data->toArray();
+        Log::info('wxNotify', $data);
+        DB::transaction(function () use ($data) {
+            OrderService::getInstance()->wxNotify($data);
+        });
+        return Pay::wechat()->success();
     }
 }

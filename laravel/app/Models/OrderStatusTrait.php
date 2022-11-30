@@ -143,4 +143,18 @@ trait OrderStatusTrait
             'aftersale' => $this->canAfterSaleHandle(),
         ];
     }
+
+    /**
+     * 判断是否已支付
+     * @return bool
+     */
+    public function isHadPaid()
+    {
+        return !in_array($this->order_status, [
+            OrderEnum::STATUS_CREATE,
+            OrderEnum::STATUS_CANCEL,
+            OrderEnum::STATUS_AUTO_CANCEL,
+            OrderEnum::STATUS_ADMIN_CANCEL
+        ]);
+    }
 }
