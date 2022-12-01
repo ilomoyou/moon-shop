@@ -7,6 +7,7 @@ namespace App\Services;
 use App\enum\OrderEnum;
 use App\Exceptions\BusinessException;
 use App\Exceptions\NotFoundException;
+use App\Exceptions\ParametersException;
 use App\Inputs\OrderSubmitInput;
 use App\Inputs\PageInput;
 use App\Jobs\OrderUnpaidTimeEndJob;
@@ -625,19 +626,50 @@ class OrderService extends BaseService
      */
     public function getWxPayOrder($userId, $orderId)
     {
+        $order = $this->getPayOrderInfo($userId, $orderId);
+        return [
+            'out_trade_no' => $order->order_sn,
+            'body' => "订单：{$order->order_sn}",
+            'total_fee' => bcmul($order->actual_price, 100)
+        ];
+    }
+
+    /**
+     * 获取支付宝支付订单信息
+     * @param $userId
+     * @param $orderId
+     * @return array
+     * @throws BusinessException
+     * @throws NotFoundException
+     */
+    public function getAlipayPayOrder($userId, $orderId)
+    {
+        $order = $this->getPayOrderInfo($userId, $orderId);
+        return [
+            'out_trade_no' => $order->order_sn,
+            'subject' => "订单：{$order->order_sn}",
+            'total_amount' => $order->actual_price,
+        ];
+    }
+
+    /**
+     * 获取待支付的订单信息
+     * @param $userId
+     * @param $orderId
+     * @return Order
+     * @throws BusinessException
+     * @throws NotFoundException
+     */
+    private function getPayOrderInfo($userId, $orderId)
+    {
         $order = Order::getOrderByUserIdAndId($userId, $orderId);
         if (empty($order)) {
             throw new NotFoundException('this order is not found');
         }
-        if ($order->canPayHandle()) {
+        if (!$order->canPayHandle()) {
             throw new BusinessException(ResponseCode::ORDER_PAY_FAIL, '订单支付无效');
         }
-
-        return [
-            'out_trade_no' => $order->order_sn,
-            'subject' => "订单：{$order->order_sn}",
-            'total_amount' => bcmul($order->actual_price, 100)
-        ];
+        return $order;
     }
 
     /**
@@ -653,7 +685,42 @@ class OrderService extends BaseService
         $orderSn = $data['out_trade_no'] ?? '';
         $payId = $data['transaction_id'] ?? '';
         $price = bcdiv($data['total_fee'], 100, 2);
+        return $this->notify($orderSn, $payId, $price);
+    }
 
+    /**
+     * 支付宝支付回调
+     * @param  array  $data
+     * @return Order|Model|object
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws ParametersException
+     * @throws Throwable
+     */
+    public function alipayNotify(array $data)
+    {
+        if (!in_array($data['trade_status'] ?? '', ['TRADE_SUCCESS', 'TRADE_FINISHED'])) {
+            throw new ParametersException('支付宝支付回调参数错误');
+        }
+
+        $orderSn = $data['out_trade_no'] ?? '';
+        $payId = $data['trade_no'] ?? '';
+        $price = floatval($data['total_amount'] ?? 0);
+        return $this->notify($orderSn, $payId, $price);
+    }
+
+    /**
+     * 支付回调统一处理
+     * @param $orderSn
+     * @param $payId
+     * @param $price
+     * @return Order|Model|object
+     * @throws BusinessException
+     * @throws NotFoundException
+     * @throws Throwable
+     */
+    private function notify($orderSn, $payId, $price)
+    {
         $order = Order::getOrderByOrderSn($orderSn);
         if (is_null($order)) {
             throw new NotFoundException('this order is not found');

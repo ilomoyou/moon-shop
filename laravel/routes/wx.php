@@ -79,6 +79,9 @@ Route::prefix('order')->group(function () {
     Route::get('list', [OrderController::class, 'list']); // 订单列表
     Route::post('h5pay', [OrderController::class, 'h5pay']); // 微信h5支付
     Route::post('wx-notify', [OrderController::class, 'wxNotify']); // 微信h5支付回调
+    Route::post('h5alipay', [OrderController::class, 'h5alipay']); // 支付宝支付 - h5
+    Route::post('alipay-notify', [OrderController::class, 'alipayNotify']); // 支付宝支付回调
+    Route::get('alipay-return', [OrderController::class, 'alipayReturn']); // 支付宝支付回调 - 同步
 });
 
 // 团购列表
